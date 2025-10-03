@@ -69,9 +69,9 @@ def insert_activities(activities: list):
     
     try:
         # Inserir dados (upsert com base no transaction_hash)
-        response = supabase.table("polymarket_activities").upsert(
+        response = supabase.table("polymarket_activities").insert(
             transformed_activities,
-            on_conflict="transaction_hash"
+            # on_conflict="transaction_hash"
         ).execute()
         
         print(f"✅ {len(transformed_activities)} atividades inseridas/atualizadas com sucesso!")
@@ -91,6 +91,8 @@ def main():
     
     if activities:
         print("💾 Inserindo no Supabase...")
+        for i, act in enumerate(activities[:2], 1):
+            print(f"{i}. {act}")
         insert_activities(activities)
         
         # Mostrar resumo

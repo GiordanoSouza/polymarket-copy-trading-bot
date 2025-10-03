@@ -5,7 +5,7 @@ from datetime import datetime
 url = "https://data-api.polymarket.com/activity"
 resp = requests.get(url, params={
     "user":"0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b",
-    "limit":"1",
+    "limit":"4",
     "sortBy":"TIMESTAMP",
     "sortDirection":"DESC",
 })
