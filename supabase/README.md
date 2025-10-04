@@ -1,5 +1,17 @@
 # Supabase - Polymarket Activities
 
+## 📚 Documentação
+
+- **[DATABASE_DOCUMENTATION.md](DATABASE_DOCUMENTATION.md)** - Documentação completa do banco de dados e Generated Columns
+- **[POLLING_SOLUTION.md](POLLING_SOLUTION.md)** - Solução para polling sem duplicatas
+- **[polling_activities.py](polling_activities.py)** - Script de polling contínuo
+
+## ⚠️ Importante: Generated Column
+
+A tabela possui uma **Generated Column** especial (`unique_activity_key`) que resolve o problema de duplicatas. 
+
+**Para desenvolvedores novos:** Leia primeiro o [DATABASE_DOCUMENTATION.md](DATABASE_DOCUMENTATION.md) para entender como funciona.
+
 ## Configuração
 
 ### 1. Criar arquivo `.env`
@@ -44,6 +56,7 @@ python supabase/insert_activities.py
 | Coluna | Tipo | Descrição |
 |--------|------|-----------|
 | `id` | BIGSERIAL | ID único auto-incrementado |
+| `unique_activity_key` | VARCHAR(500) | **Chave única composta gerada automaticamente** ⚡ |
 | `proxy_wallet` | VARCHAR(255) | Endereço da carteira proxy |
 | `timestamp` | BIGINT | Unix timestamp da atividade |
 | `activity_datetime` | TIMESTAMP | Data/hora convertida |
@@ -71,6 +84,7 @@ python supabase/insert_activities.py
 
 ## Índices
 
+- **`idx_unique_activity_key`** (UNIQUE): **Previne duplicatas** - essencial para polling
 - `idx_proxy_wallet`: Para buscar atividades por usuário
 - `idx_timestamp`: Para ordenar por data
 - `idx_type`: Para filtrar por tipo de atividade

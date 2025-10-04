@@ -16,7 +16,7 @@ if not url or not key:
 
 supabase: Client = create_client(url, key)
 
-def fetch_polymarket_activities(user_address: str, limit: int = 10):
+def fetch_polymarket_activities(user_address: str, limit: int = 50):
     """
     Busca atividades de um usuário no Polymarket
     """
@@ -63,19 +63,49 @@ def transform_activity(activity: dict) -> dict:
 
 def insert_activities(activities: list):
     """
-    Insere atividades no Supabase
+    Insere atividades no Supabase usando upsert baseado na unique_activity_key
     """
     transformed_activities = [transform_activity(act) for act in activities]
     
+    if not transformed_activities:
+        print("⚠️ Nenhuma atividade para inserir")
+        return None
+    
     try:
-        # Inserir dados (upsert com base no transaction_hash)
-        response = supabase.table("polymarket_activities").insert(
-            transformed_activities,
-            # on_conflict="transaction_hash"
-        ).execute()
+        # Fazer upsert individual para cada atividade
+        # Isso evita duplicatas baseado na unique_activity_key
+        inserted_count = 0
+        skipped_count = 0
         
-        print(f"✅ {len(transformed_activities)} atividades inseridas/atualizadas com sucesso!")
-        return response
+        for activity in transformed_activities:
+            # Gerar a chave única composta (mesma lógica da coluna computed)
+            condition_id = activity.get('condition_id') or 'null'
+            price = str(activity.get('price')) if activity.get('price') is not None else 'null'
+            unique_key = f"{activity['transaction_hash']}_{condition_id}_{price}"
+            
+            try:
+                # Verificar se já existe
+                existing = supabase.table("polymarket_activities").select("id").eq(
+                    "unique_activity_key", unique_key
+                ).execute()
+                
+                if not existing.data:
+                    # Inserir apenas se não existir
+                    supabase.table("polymarket_activities").insert(activity).execute()
+                    inserted_count += 1
+                else:
+                    skipped_count += 1
+                    
+            except Exception as e:
+                # Se der erro de unique constraint, é porque já existe
+                if "unique" in str(e).lower() or "duplicate" in str(e).lower():
+                    skipped_count += 1
+                else:
+                    raise
+        
+        print(f"✅ {inserted_count} atividades inseridas | {skipped_count} já existiam (puladas)")
+        return {"inserted": inserted_count, "skipped": skipped_count}
+        
     except Exception as e:
         print(f"❌ Erro ao inserir atividades: {e}")
         raise
@@ -85,7 +115,7 @@ def main():
     user_address = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b"
     
     print(f"🔍 Buscando atividades do usuário {user_address}...")
-    activities = fetch_polymarket_activities(user_address, limit=50)
+    activities = fetch_polymarket_activities(user_address, limit=500 )
     
     print(f"📊 Encontradas {len(activities)} atividades")
     
