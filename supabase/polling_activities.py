@@ -180,7 +180,7 @@ def main():
     # Configurações
     USER_ADDRESS = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b"  # Car/Peppery-Capital
     INTERVAL_SECONDS = 60  # Polling a cada 60 segundos (1 minuto)
-    LIMIT = 100  # Buscar até 100 atividades por poll
+    LIMIT = 500  # Buscar até 100 atividades por poll
     
     print("\n" + "="*80)
     print("🎯 POLYMARKET ACTIVITY POLLING - COPY TRADING")

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS polymarket_activities (
     type VARCHAR(50) NOT NULL,
     size NUMERIC(20, 6),
     usdc_size NUMERIC(20, 6),
-    transaction_hash VARCHAR(255) UNIQUE,
+    transaction_hash VARCHAR(255),
     price NUMERIC(20, 10),
     asset TEXT,
     side VARCHAR(10),
