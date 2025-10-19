@@ -71,6 +71,7 @@ def fetch_activities(user_address: str, limit: int = 500, offset: int = 0):
     data = resp.json()
     db_activities = [transform_activity_to_db_format(activity) for activity in data]
     print('db_activities', db_activities[0])
+    print('db_activities length', len(db_activities))
     return db_activities
 
 
@@ -83,20 +84,12 @@ def insert_activities_batch(activities: list):
         print("No activities to insert")
         return
     for activity in activities:
-        condition_id = activity.get('condition_id') or 'null'
-        price = str(activity.get('price')) if activity.get('price') is not None else 'null'
-        unique_key = f"{activity['transaction_hash']}_{condition_id}_{price}"
         try:
-            response = supabase.table(TABLE_NAME).upsert(activity).eq('unique_key', unique_key).execute()
-            if not response.data:
-                supabase.table(TABLE_NAME).insert(activity).execute()
-                success_count += 1
-            else:
-                print(f"Activity already exists: {activity['transaction_hash']}")
-                break
+            supabase.table(TABLE_NAME).insert(activity).execute()
+            success_count += 1
         except Exception as e:
             print(f"Error inserting activities: {e}")
-            return None
+            return success_count
     return success_count
 
 if __name__ == "__main__":
