@@ -17,22 +17,6 @@ API_URL = "https://data-api.polymarket.com/activity"
 MAX_LIMIT = 500  # max limit of the api
 TABLE_NAME = "historic_trades"
 
-
-def fetch_activities(user_address: str, limit: int = 500, offset: int = 0):
-    """
-    Fetch activities from the api
-    """
-    resp = requests.get(API_URL, params={
-        "user": user_address,
-        "limit": str(limit),
-        "offset": str(offset),
-        "sortBy": "TIMESTAMP",
-        "sortDirection": "DESC",
-    })
-
-    data = resp.json()
-    return data
-
 def transform_activity_to_db_format(activity: dict) -> dict:
     """
     Transforma o formato da API para o formato do banco de dados
@@ -71,3 +55,52 @@ def transform_activity_to_db_format(activity: dict) -> dict:
         'profile_image': activity.get('profileImage'),
         'profile_image_optimized': activity.get('profileImageOptimized'),
     }
+
+def fetch_activities(user_address: str, limit: int = 500, offset: int = 0):
+    """
+    Fetch activities from the api
+    """
+    resp = requests.get(API_URL, params={
+        "user": user_address,
+        "limit": str(limit),
+        "offset": str(offset),
+        "sortBy": "TIMESTAMP",
+        "sortDirection": "DESC",
+    })
+
+    data = resp.json()
+    db_activities = [transform_activity_to_db_format(activity) for activity in data]
+    print('db_activities', db_activities[0])
+    return db_activities
+
+
+def insert_activities_batch(activities: list):
+    """
+    Insert activities into the database
+    """
+    success_count = 0
+    if not activities:
+        print("No activities to insert")
+        return
+    for activity in activities:
+        condition_id = activity.get('condition_id') or 'null'
+        price = str(activity.get('price')) if activity.get('price') is not None else 'null'
+        unique_key = f"{activity['transaction_hash']}_{condition_id}_{price}"
+        try:
+            response = supabase.table(TABLE_NAME).upsert(activity).eq('unique_key', unique_key).execute()
+            if not response.data:
+                supabase.table(TABLE_NAME).insert(activity).execute()
+                success_count += 1
+            else:
+                print(f"Activity already exists: {activity['transaction_hash']}")
+                break
+        except Exception as e:
+            print(f"Error inserting activities: {e}")
+            return None
+    return success_count
+
+if __name__ == "__main__":
+    user_address = input("Enter the user address: ")
+    activities = fetch_activities(user_address)
+    success_count = insert_activities_batch(activities)
+    print(f"Success count: {success_count}")
