@@ -52,8 +52,8 @@ async def listen_to_trades():
     except KeyboardInterrupt:
         await response.unsubscribe()
         print("✅ Desconectado com sucesso!")
-    
-    
+
+
 if __name__ == "__main__":
-    # Executar o listener assíncrono
     asyncio.run(listen_to_trades())
+    
