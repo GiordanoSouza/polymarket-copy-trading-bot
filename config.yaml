@@ -1,0 +1,52 @@
+# ==========================================
+# COPYTRADING CONFIG – STARTER PACK (v1.0)
+# ==========================================
+# Bankroll total disponível
+bankroll: 1000   # em USDT
+
+# --------------------------
+# 1. FILTROS DE ENTRADA
+# --------------------------
+filters:
+  odds_min: 0.10              # odds mínimas aceitáveis
+  odds_max: 0.90              # odds máximas aceitáveis
+  slippage_max_points: 0.5    # diferença máxima de preço (em pontos)
+  min_hours_to_resolution: 24 # evitar eventos que resolvem em <24h
+  min_book_depth_multiple: 10 # volume mínimo = 10x o stake dentro de ±1 ponto
+  copy_only_first_entry: true # copiar só a primeira entrada relevante do whale
+
+# --------------------------
+# 2. SIZING / ALOCAÇÃO
+# --------------------------
+sizing:
+  stake_min: 5                # aposta mínima
+  stake_max: 20               # aposta máxima
+  stake_whale_pct: 0.005      # 0,5% do valor da ordem do whale
+  max_exposure_per_market_pct: 0.05  # exposição máxima por mercado (5%)
+  bankroll_reserve_pct: 0.30  # manter pelo menos 30% em caixa
+
+# --------------------------
+# 3. EXECUÇÃO
+# --------------------------
+execution:
+  order_type: limit           # usar ordens limitadas, nunca a mercado
+  limit_ttl_minutes: 15       # tempo de validade da ordem (TTL)
+  max_new_trades_per_day: 3   # máximo de novas entradas por dia
+
+# --------------------------
+# 4. SAÍDAS / GESTÃO DE POSIÇÃO
+# --------------------------
+exits:
+  take_profit_pct: 0.20       # take-profit: +20% → zerar posição
+  stop_loss_pct: -0.10        # stop-loss: -10% → sair da posição
+  time_stop_days: 5           # sair após 5 dias úteis se não andar
+  flat_band_pct: 0.05         # se variação <±5% após 5 dias → sair
+
+# --------------------------
+# 5. METADADOS
+# --------------------------
+meta:
+  version: "1.0"
+  strategy_name: "Starter Pack Basic Rules"
+  created_by: "Giordano Souza"
+  last_update: "2025-10-25"
