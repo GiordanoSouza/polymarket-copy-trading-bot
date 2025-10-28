@@ -36,6 +36,6 @@ def make_order(price: float, size: float, side: str, token_id: str):
         return None
 
 if __name__ == "__main__":
-    make_order(price=0.015, size=5.0, side=SELL, token_id='70663352401606372246362604193214664065595751757222752105245221905399175050480')
+    make_order(price=0.071, size=14.1, side=BUY, token_id='27745789011483877770092220164639878505910623464021791529418856008078952259643')
 
     

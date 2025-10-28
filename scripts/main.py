@@ -2,7 +2,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from supabase import acreate_client, AsyncClient
-import make_orders
+from make_orders import make_order
 import get_ok
 from constraints.sizing import sizing_constraints
 from constraints.validators import has_already_an_open_position
@@ -12,11 +12,9 @@ load_dotenv()
 # Config Supabase
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
-
 async def create_supabase():
   supabase: AsyncClient = await acreate_client(url, key)
   return supabase
-
 TABLE_NAME = "historic_trades"
 
 
@@ -24,9 +22,24 @@ def handle_new_trade(payload):
     
     transaction_hash = payload.get('data').get('record').get('transaction_hash')
     usdc_size = payload.get('data').get('record').get('usdc_size')
-    print('transaction_hash:', transaction_hash)
-    print('usdc_size:', usdc_size)
-    return transaction_hash, usdc_size
+    side = payload.get('data').get('record').get('side')
+    token_id = payload.get('data').get('record').get('asset')
+    title = payload.get('data').get('record').get('title')
+    
+    print("\n" + "=" * 100)
+    print("🔍 Nova trade recebida!")
+    print('Title:', title)
+    print('Asset:', transaction_hash)
+    print('USDC Size:', usdc_size)
+    print('Side:', side)
+    print('Token ID:', token_id)
+
+    sized_price = sizing_constraints(usdc_size)
+
+    response = make_order(price=sized_price, size=sized_price, side=side, token_id=token_id)
+    print('Response:', response)
+    return response
+
 
 
 async def listen_to_trades():
@@ -46,6 +59,7 @@ async def listen_to_trades():
     .subscribe()
     )
     
+
     print("✅ Conectado! Aguardando novas trades...")
     print("   (Pressione Ctrl+C para parar)\n")
     
@@ -56,7 +70,6 @@ async def listen_to_trades():
     except KeyboardInterrupt:
         await response.unsubscribe()
         print("✅ Desconectado com sucesso!")
-
 
 if __name__ == "__main__":
     asyncio.run(listen_to_trades())

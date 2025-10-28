@@ -2,9 +2,9 @@
 
 def sizing_constraints(usdc_size: float) -> float:
     new_size = usdc_size * 0.001
+    print(new_size)
     return new_size
 
 if __name__ == "__main__":
-    new_size = sizing_constraints(100)
-    print(new_size)
-    print(type(new_size))
+    sizing_constraints(500)
+    
