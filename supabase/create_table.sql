@@ -27,6 +27,40 @@ CREATE TABLE IF NOT EXISTS polymarket_activities (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+
+
+CREATE TABLE IF NOT EXISTS polymarket_positions (
+    proxy_wallet        CHAR(42)        NOT NULL,
+    asset               NUMERIC(78, 0)  NOT NULL,
+    condition_id        CHAR(66)        NOT NULL,
+    size                NUMERIC(20, 6)  NOT NULL,
+    avg_price           NUMERIC(10, 6)  NOT NULL,
+    initial_value       NUMERIC(24, 6)  NOT NULL,
+    current_value       NUMERIC(24, 6)  NOT NULL,
+    cash_pnl            NUMERIC(24, 6)  NOT NULL,
+    percent_pnl         NUMERIC(10, 6)  NOT NULL,
+    total_bought        NUMERIC(24, 6)  NOT NULL,
+    realized_pnl        NUMERIC(24, 6)  NOT NULL,
+    percent_realized_pnl NUMERIC(10, 6) NOT NULL,
+    cur_price           NUMERIC(10, 6)  NOT NULL,
+    redeemable          BOOLEAN         NOT NULL,
+    mergeable           BOOLEAN         NOT NULL,
+    title               VARCHAR(255)    NOT NULL,
+    slug                VARCHAR(255)    NOT NULL,
+    icon                TEXT            NOT NULL,
+    event_id            BIGINT          NULL,
+    event_slug          VARCHAR(255)    NOT NULL,
+    outcome             VARCHAR(32)     NOT NULL,
+    outcome_index       SMALLINT        NOT NULL,
+    opposite_outcome    VARCHAR(32)     NOT NULL,
+    opposite_asset      NUMERIC(78, 0)  NOT NULL,
+    end_date            DATE            NULL,
+    negative_risk       BOOLEAN         NOT NULL,
+    created_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (proxy_wallet, asset)
+);
+
 -- Índices para melhorar performance de consultas
 CREATE INDEX IF NOT EXISTS idx_proxy_wallet ON polymarket_activities(proxy_wallet);
 CREATE INDEX IF NOT EXISTS idx_timestamp ON polymarket_activities(timestamp DESC);
