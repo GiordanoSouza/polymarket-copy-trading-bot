@@ -1,17 +1,18 @@
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import OrderArgs, OrderType
 from py_clob_client.order_builder.constants import BUY, SELL
-import os
-from dotenv import load_dotenv
+from config import get_config
+
+# Load configuration once at module level
+config = get_config()
 
 def make_order(price: float, size: float, side: str, token_id: str):
-    load_dotenv()
     try:
         print('Making order...')
-        host: str = os.getenv("CLOB_API_URL")
-        key: str = os.getenv("PK") #This is your Private Key. Export from https://reveal.magic.link/polymarket or from your Web3 Extension
-        chain_id: int = int(os.getenv("POLY_CHAIN_ID")) #No need to adjust this
-        POLYMARKET_PROXY_ADDRESS: str = os.getenv("POLY_FUNDER") #This is the address listed below your profile picture when using the Polymarket site.
+        host: str = config.CLOB_API_URL
+        key: str = config.PRIVATE_KEY  # This is your Private Key. Export from https://reveal.magic.link/polymarket or from your Web3 Extension
+        chain_id: int = config.POLY_CHAIN_ID  # No need to adjust this
+        POLYMARKET_PROXY_ADDRESS: str = config.POLY_FUNDER  # This is the address listed below your profile picture when using the Polymarket site.
 
         ### Initialization of a client using a Polymarket Proxy associated with an Email/Magic account. If you login with your email use this example.
         client = ClobClient(host, key=key, chain_id=chain_id, signature_type=1, funder=POLYMARKET_PROXY_ADDRESS)

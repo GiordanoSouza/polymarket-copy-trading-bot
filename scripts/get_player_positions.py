@@ -212,10 +212,13 @@ def detect_big_positions(positions: list, size_limit: float = 1000.0):
     return big_positions
 
 if __name__ == '__main__':
-    user = '0xB11D215dBA84Fa96F92DBB151D865E1776e05ddA'
-    positions = fetch_player_positions(user_address=proxy_wallet_self)
-    print("positions", positions[0])
-    insert_player_positions_batch(positions)
-    # print(f"Success count: {success_count}")
-    print_positions_readable(positions)
+    # Example usage - replace with actual wallet address
+    user = input("Enter user address to fetch positions: ") or proxy_wallet_self
+    positions = fetch_player_positions(user_address=user)
+    if positions:
+        print("positions", positions[0])
+        insert_player_positions_batch(positions)
+        print_positions_readable(positions)
+    else:
+        print("No positions found for this user.")
 

@@ -76,6 +76,12 @@ coverage.xml
 # Supabase CLI artifacts
 .supabase/
 
+# Personal notes and sensitive data
+Notes.txt
+notes.txt
+*.local.yaml
+*.local.yml
+
 # OS-generated files
 .DS_Store
 Thumbs.db

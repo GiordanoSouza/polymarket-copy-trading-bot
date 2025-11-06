@@ -3,8 +3,12 @@ from datetime import datetime
 
 
 url = "https://data-api.polymarket.com/activity"
+
+# Example: Get user address from input or environment
+user_address = input("Enter user address to fetch activities: ")
+
 resp = requests.get(url, params={
-    "user":"0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b",
+    "user": user_address,
     "limit":"4",
     "sortBy":"TIMESTAMP",
     "sortDirection":"DESC",

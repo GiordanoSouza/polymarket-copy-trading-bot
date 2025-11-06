@@ -1,141 +1,46 @@
-# Supabase - Polymarket Activities
+# 🗄️ Supabase Database Setup
+This directory contains all files necessary to configure the Supabase database for the copytrading bot.
 
-## 📚 Documentação
+### 1. Create Supabase Account
+1. Go to [supabase.com](https://supabase.com/)
+2. Click "Start your project"
+3. Log in with GitHub or email
+4. Create a new project (free plan works)
 
-- **[DATABASE_DOCUMENTATION.md](DATABASE_DOCUMENTATION.md)** - Documentação completa do banco de dados e Generated Columns
-- **[POLLING_SOLUTION.md](POLLING_SOLUTION.md)** - Solução para polling sem duplicatas
-- **[polling_activities.py](polling_activities.py)** - Script de polling contínuo
+### 2. Obtain Credentials
+1. In the project dashboard, go to **Settings** → **API**
+2. Copy:
+   - **Project URL**: `https://xxxxx.supabase.co`
+   - **anon public key**: Key starting with `eyJ...`
+⚠️ **Use the `anon` key, NOT `service_role`!**
 
-## ⚠️ Importante: Generated Column
+### 3. Execute SQL Script
 
-A tabela possui uma **Generated Column** especial (`unique_activity_key`) que resolve o problema de duplicatas. 
+1. On Supabase, go to **SQL Editor**
+2. Click **+ New Query**
+3. Copy all content from `create_table.sql`
+4. Paste in the editor and click **Run** (or Ctrl+Enter)
+5. Wait for "Success. No rows returned" message
 
-**Para desenvolvedores novos:** Leia primeiro o [DATABASE_DOCUMENTATION.md](DATABASE_DOCUMENTATION.md) para entender como funciona.
+### 4. Verify Creation
 
-## Configuração
+1. Go to **Table Editor**
+2. You should see:
+   - `historic_trades`
+   - `polymarket_positions`
 
-### 1. Criar arquivo `.env`
+✅ Done! Your database is configured.
 
-Na raiz do projeto, crie um arquivo `.env` com suas credenciais do Supabase:
+### 5. Configure .env File
+
+In the **project root** (not in the supabase folder), add to your `.env`:
 
 ```env
-SUPABASE_URL=https://seu-projeto.supabase.co
-SUPABASE_KEY=sua-chave-anon-key
+SUPABASE_URL=https://your-project-here.supabase.co
+SUPABASE_KEY=your-anon-public-key-here
 ```
 
-**Como obter as credenciais:**
-1. Acesse seu projeto no [Supabase](https://app.supabase.com)
-2. Vá em Settings > API
-3. Copie a `URL` e a `anon/public` key
+## ⚠️ Important: Generated Column
 
-### 2. Criar a tabela no Supabase
-
-Execute o SQL no Supabase SQL Editor:
-
-1. No dashboard do Supabase, vá em **SQL Editor**
-2. Clique em **New Query**
-3. Cole o conteúdo do arquivo `create_table.sql`
-4. Execute o script (botão Run ou Ctrl+Enter)
-
-### 3. Instalar dependências
-
-```bash
-pip install supabase requests python-dotenv
-```
-
-### 4. Executar o script
-
-```bash
-python supabase/insert_activities.py
-```
-
-## Estrutura da Tabela
-
-### `polymarket_activities`
-
-| Coluna | Tipo | Descrição |
-|--------|------|-----------|
-| `id` | BIGSERIAL | ID único auto-incrementado |
-| `unique_activity_key` | VARCHAR(500) | **Chave única composta gerada automaticamente** ⚡ |
-| `proxy_wallet` | VARCHAR(255) | Endereço da carteira proxy |
-| `timestamp` | BIGINT | Unix timestamp da atividade |
-| `activity_datetime` | TIMESTAMP | Data/hora convertida |
-| `condition_id` | VARCHAR(255) | ID da condição do mercado |
-| `type` | VARCHAR(50) | Tipo: TRADE, YIELD, etc |
-| `size` | NUMERIC | Quantidade de tokens |
-| `usdc_size` | NUMERIC | Valor em USDC |
-| `transaction_hash` | VARCHAR(255) | Hash da transação (único) |
-| `price` | NUMERIC | Preço unitário |
-| `asset` | TEXT | ID do ativo |
-| `side` | VARCHAR(10) | BUY ou SELL |
-| `outcome_index` | INTEGER | Índice do resultado |
-| `title` | TEXT | Título do mercado |
-| `slug` | VARCHAR(255) | Slug do mercado |
-| `icon` | TEXT | URL do ícone |
-| `event_slug` | VARCHAR(255) | Slug do evento |
-| `outcome` | VARCHAR(50) | Resultado (Yes/No) |
-| `trader_name` | VARCHAR(255) | Nome do trader |
-| `pseudonym` | VARCHAR(255) | Pseudônimo do trader |
-| `bio` | TEXT | Biografia do trader |
-| `profile_image` | TEXT | URL da imagem de perfil |
-| `profile_image_optimized` | TEXT | URL da imagem otimizada |
-| `created_at` | TIMESTAMP | Data de criação do registro |
-| `updated_at` | TIMESTAMP | Data de atualização |
-
-## Índices
-
-- **`idx_unique_activity_key`** (UNIQUE): **Previne duplicatas** - essencial para polling
-- `idx_proxy_wallet`: Para buscar atividades por usuário
-- `idx_timestamp`: Para ordenar por data
-- `idx_type`: Para filtrar por tipo de atividade
-- `idx_event_slug`: Para buscar por evento específico
-- `idx_activity_datetime`: Para consultas temporais
-
-## Consultas Úteis
-
-### Buscar todas as atividades de um usuário
-
-```sql
-SELECT * FROM polymarket_activities 
-WHERE proxy_wallet = '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b'
-ORDER BY timestamp DESC;
-```
-
-### Buscar apenas trades
-
-```sql
-SELECT * FROM polymarket_activities 
-WHERE type = 'TRADE'
-ORDER BY timestamp DESC;
-```
-
-### Calcular volume total por usuário
-
-```sql
-SELECT 
-    proxy_wallet,
-    trader_name,
-    COUNT(*) as total_trades,
-    SUM(usdc_size) as volume_total
-FROM polymarket_activities
-WHERE type = 'TRADE'
-GROUP BY proxy_wallet, trader_name
-ORDER BY volume_total DESC;
-```
-
-### Buscar atividades recentes (últimas 24h)
-
-```sql
-SELECT * FROM polymarket_activities 
-WHERE activity_datetime > NOW() - INTERVAL '24 hours'
-ORDER BY timestamp DESC;
-```
-
-## Próximos Passos
-
-1. **Automação**: Criar um cron job para buscar atividades periodicamente
-2. **Dashboard**: Criar visualizações no Supabase ou integrar com ferramentas como Metabase
-3. **Alertas**: Configurar notificações para trades grandes
-4. **Analytics**: Criar views agregadas para análises de desempenho
-
+The `historic_trades` table has a special **Generated Column** (`unique_activity_key`) that automatically prevents duplicates. 
 

@@ -267,14 +267,18 @@ if __name__ == "__main__":
     # ============================================================
     
     # Exemplo com um único player
-    player_address = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b"
-    import_player_history(player_address, days_back=365)
+    player_address = input("Enter player wallet address: ")
+    if player_address:
+        days_back = int(input("Enter days of history to fetch (default 365): ") or "365")
+        import_player_history(player_address, days_back=days_back)
+    else:
+        print("No player address provided.")
     
     # Ou importe múltiplos players de uma vez
     # players = [
-    #     "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b",
-    #     "0x1234567890abcdef1234567890abcdef12345678",
-    #     "0xabcdef1234567890abcdef1234567890abcdef12",
+    #     "0x1234...abcd",  # Replace with actual addresses
+    #     "0x5678...efgh",
+    #     "0x9abc...ijkl",
     # ]
     # import_multiple_players(players, days_back=365)
 

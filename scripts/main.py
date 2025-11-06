@@ -4,7 +4,6 @@ from datetime import datetime
 import threading
 import time
 import traceback
-from dotenv import load_dotenv
 from supabase import acreate_client, AsyncClient
 from make_orders import make_order
 from get_player_positions import fetch_player_positions, insert_player_positions_batch
@@ -16,15 +15,17 @@ import get_ok
 from constraints.sizing import sizing_constraints
 from constraints.validators import has_already_an_open_position
 from py_clob_client.order_builder.constants import BUY, SELL
+from config import get_config
 
-load_dotenv()
+# Load configuration
+config = get_config()
 
-# Config Supabase
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-proxy_wallet_self = os.environ.get("PROXY_WALLET_SELF")
-TABLE_NAME_TRADES = "historic_trades"
-TABLE_NAME_POSITIONS = "polymarket_positions"
+# Config Supabase (from centralized config)
+url: str = config.SUPABASE_URL
+key: str = config.SUPABASE_KEY
+proxy_wallet_self = config.PROXY_WALLET_SELF
+TABLE_NAME_TRADES = config.TABLE_NAME_TRADES
+TABLE_NAME_POSITIONS = config.TABLE_NAME_POSITIONS
 
 # Cliente Supabase compartilhado
 _supabase_client: AsyncClient = None
@@ -330,7 +331,7 @@ async def run_all_listeners():
 
 def _start_polling_threads():
     """Start 5s polling threads for history and positions."""
-    user_addr = os.getenv("PROXY_WALLET_SELF")
+    user_addr = config.PROXY_WALLET_SELF
     print("iniciando polling threads")
     if not user_addr:
         print("No user address configured for polling; skipping background polling.")
@@ -361,6 +362,9 @@ def _start_polling_threads():
 
 
 if __name__ == "__main__":
+    # Print configuration summary
+    config.print_config_summary()
+    
     try:
         _start_polling_threads()
     except Exception:

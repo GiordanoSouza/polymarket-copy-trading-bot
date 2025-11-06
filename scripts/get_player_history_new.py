@@ -1,21 +1,22 @@
 import requests
 import os
 import datetime
-from dotenv import load_dotenv
 from supabase import create_client, Client
 from datetime import datetime, timedelta
+from config import get_config
 
-load_dotenv()
+# Load configuration
+config = get_config()
 
 # config supabase
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
+url: str = config.SUPABASE_URL
+key: str = config.SUPABASE_KEY
 supabase: Client = create_client(url, key)
 
 # config api
 API_URL = "https://data-api.polymarket.com/activity"
 MAX_LIMIT = 500  # max limit of the api
-TABLE_NAME = "historic_trades"
+TABLE_NAME = config.TABLE_NAME_TRADES
 
 def transform_activity_to_db_format(activity: dict) -> dict:
     """
