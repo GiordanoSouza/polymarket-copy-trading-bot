@@ -214,6 +214,8 @@ def detect_big_positions(positions: list, size_limit: float = 1000.0):
 if __name__ == '__main__':
     user = '0xB11D215dBA84Fa96F92DBB151D865E1776e05ddA'
     positions = fetch_player_positions(user_address=proxy_wallet_self)
+    print("positions", positions[0])
     insert_player_positions_batch(positions)
     # print(f"Success count: {success_count}")
     print_positions_readable(positions)
+

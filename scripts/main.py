@@ -315,7 +315,8 @@ async def run_all_listeners():
 
 def _start_polling_threads():
     """Start 5s polling threads for history and positions."""
-    user_addr = os.getenv("USER_ADDRESS")
+    user_addr = os.getenv("PROXY_WALLET_SELF")
+    print("iniciando polling threads")
     if not user_addr:
         print("No user address configured for polling; skipping background polling.")
         return
