@@ -26,8 +26,10 @@ def fetch_player_positions(user_address: str, limit: int = 500, offset: int = 0,
             "offset": str(offset),
             "sortBy": "INITIAL",
             "sortDirection": "DESC",
-            "conditionId": condition_id,
         }
+        # Apenas inclua conditionId quando houver valor
+        if condition_id is not None:
+            params["conditionId"] = condition_id
         
         response = requests.get(API_URL, params=params, timeout=5)
         response.raise_for_status()

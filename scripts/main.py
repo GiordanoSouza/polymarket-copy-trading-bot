@@ -1,9 +1,17 @@
 import os
 import asyncio
 from datetime import datetime
+import threading
+import time
+import traceback
 from dotenv import load_dotenv
 from supabase import acreate_client, AsyncClient
 from make_orders import make_order
+from get_player_positions import fetch_player_positions, insert_player_positions_batch
+from get_player_history_new import (
+    fetch_activities as fetch_history_activities,
+    insert_activities_batch as insert_history_batch,
+)
 import get_ok
 from constraints.sizing import sizing_constraints
 from constraints.validators import has_already_an_open_position
@@ -14,6 +22,7 @@ load_dotenv()
 # Config Supabase
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
+proxy_wallet_self = os.environ.get("PROXY_WALLET_SELF")
 TABLE_NAME_TRADES = "historic_trades"
 TABLE_NAME_POSITIONS = "polymarket_positions"
 
@@ -43,6 +52,8 @@ def handle_new_trade(payload):
         title = record.get('title')
         price = record.get('price')
         size = record.get('size')
+        proxy_wallet = record.get('proxy_wallet')
+        condition_id = record.get('condition_id')
         
         print("\n" + "=" * 100)
         print(f"🔍 Nova trade recebida! [{datetime.now().strftime('%H:%M:%S')}]")
@@ -54,20 +65,28 @@ def handle_new_trade(payload):
         print(f"💵 Price: {price}")
         print("=" * 100)
 
-        sized_price = sizing_constraints(usdc_size)
-
         if side == SELL:
             print(f"⏭️  Side is SELL, checking the % of the position from the TRADER")
-            
-        
-        if sized_price >= 1:
-            print(f"✅ Sized price ({sized_price}) >= 1, fazendo ordem...")
-            response = make_order(price=price, size=sizing_constraints(size), side=side, token_id=token_id)
+            data_trader = fetch_player_positions(user_address=proxy_wallet, condition_id=condition_id)
+            data_myself = fetch_player_positions(user_address=proxy_wallet_self, condition_id=condition_id)
+            size_trader = data_trader[0].get('size')
+            size_myself = data_myself[0].get('size')
+            percentage_position = usdc_size / size_trader
+            final_size = percentage_position*size_myself
+            response = make_order(price=price, size=final_size, side=side, token_id=token_id)
             print(f"📤 Response: {response}")
             return response 
         else:
-            print(f"⏭️  Sized price ({sized_price}) < 1, pulando ordem")
-            return None
+            print(f"⏭️  Side is BUY, checking if size is greater than 1")
+            sized_price = sizing_constraints(usdc_size)
+            if sized_price >= 1:
+                print(f"✅ Sized price ({sized_price}) >= 1, fazendo ordem...")
+                response = make_order(price=price, size=sizing_constraints(size), side=side, token_id=token_id)
+                print(f"📤 Response: {response}")
+                return response 
+            else:
+                print(f"⏭️  Sized price ({sized_price}) < 1, pulando ordem")
+                return None
     except Exception as e:
         print(f"❌ Erro ao processar nova trade: {e}")
         return None
@@ -82,7 +101,7 @@ def handle_new_position(payload):
         
         # Campos do Polymarket (camelCase)
         asset = record.get('asset')
-        initial_value = record.get('initialValue')  # ✅ Corrigido: camelCase
+        initial_value = record.get('initialValue') 
         size = record.get('size')
         avg_price = record.get('avgPrice', 0)
         title = record.get('title', 'N/A')
@@ -294,7 +313,43 @@ async def run_all_listeners():
         print("👋 Sistema encerrado!")
 
 
+def _start_polling_threads():
+    """Start 5s polling threads for history and positions."""
+    user_addr = proxy_wallet_self or os.getenv("USER_ADDRESS")
+    if not user_addr:
+        print("No user address configured for polling; skipping background polling.")
+        return
+
+    def poll_history_loop():
+        while True:
+            try:
+                activities = fetch_history_activities(user_addr, limit=50, offset=0)
+                if activities:
+                    insert_history_batch(activities)
+            except Exception:
+                traceback.print_exc()
+            time.sleep(5)
+
+    def poll_positions_loop():
+        while True:
+            try:
+                positions = fetch_player_positions(user_address=user_addr, limit=50, offset=0)
+                if positions:
+                    insert_player_positions_batch(positions)
+            except Exception:
+                traceback.print_exc()
+            time.sleep(5)
+
+    threading.Thread(target=poll_history_loop, daemon=True).start()
+    threading.Thread(target=poll_positions_loop, daemon=True).start()
+
+
 if __name__ == "__main__":
+    try:
+        _start_polling_threads()
+    except Exception:
+        traceback.print_exc()
+
     # Executar todos os listeners
     asyncio.run(run_all_listeners())
     
