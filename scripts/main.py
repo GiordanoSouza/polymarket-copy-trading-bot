@@ -149,16 +149,16 @@ def handle_update_position(payload):
         title = new_record.get('title', 'N/A')
         outcome = new_record.get('outcome', 'N/A')
         
-        old_value = old_record.get('currentValue', 0)  # ✅ Corrigido: camelCase
-        new_value = new_record.get('currentValue', 0)  # ✅ Corrigido: camelCase
+        old_value = old_record.get('current_value', 0)  # ✅ Corrigido: camelCase
+        new_value = new_record.get('current_value', 0)  # ✅ Corrigido: camelCase
         old_size = old_record.get('size', 0)
         new_size = new_record.get('size', 0)
         
         # Informações de PnL
-        cash_pnl = new_record.get('cashPnl', 0)
-        percent_pnl = new_record.get('percentPnl', 0)
-        cur_price = new_record.get('curPrice', 0)
-        avg_price = new_record.get('avgPrice', 0)
+        cash_pnl = new_record.get('cash_pnl', 0)
+        percent_pnl = new_record.get('percent_pnl', 0)
+        cur_price = new_record.get('cur_price', 0)
+        avg_price = new_record.get('avg_price', 0)
         
         print("\n" + "=" * 100)
         print(f"🔄 Atualização de posição recebida! [{datetime.now().strftime('%H:%M:%S')}]")
