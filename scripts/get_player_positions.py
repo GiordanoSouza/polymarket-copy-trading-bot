@@ -12,12 +12,13 @@ load_dotenv()
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
+proxy_wallet_self = os.environ.get("PROXY_WALLET_SELF")
 
 API_URL = 'https://data-api.polymarket.com/positions'
 MAX_LIMIT = 500  # Limite máximo da API
 TABLE_NAME = "polymarket_positions"
 
-def fetch_player_positions(user_address: str, limit: int = 500, offset: int = 0):
+def fetch_player_positions(user_address: str, limit: int = 500, offset: int = 0, condition_id: str = None):
     try:
         params = {
             "user": user_address,
@@ -25,6 +26,7 @@ def fetch_player_positions(user_address: str, limit: int = 500, offset: int = 0)
             "offset": str(offset),
             "sortBy": "INITIAL",
             "sortDirection": "DESC",
+            "conditionId": condition_id,
         }
         
         response = requests.get(API_URL, params=params, timeout=5)
@@ -152,6 +154,7 @@ def detect_big_positions(positions: list, size_limit: float = 1000.0):
 
 if __name__ == '__main__':
     user = '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b'
-    positions = fetch_player_positions(user)
-    success_count = insert_player_positions_batch(positions)
-    print(f"Success count: {success_count}")
+    positions = fetch_player_positions(user_address=proxy_wallet_self)
+    # success_count = insert_player_positions_batch(positions)
+    # print(f"Success count: {success_count}")
+    print(positions[0])

@@ -56,7 +56,7 @@ def transform_activity_to_db_format(activity: dict) -> dict:
         'profile_image_optimized': activity.get('profileImageOptimized'),
     }
 
-def fetch_activities(user_address: str, limit: int = 500, offset: int = 17):
+def fetch_activities(user_address: str, limit: int = 500, offset: int = 0):
     """
     Fetch activities from the api
     """
