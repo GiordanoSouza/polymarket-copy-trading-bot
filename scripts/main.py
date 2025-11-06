@@ -171,14 +171,29 @@ def handle_update_position(payload):
         print(f"📈 PnL: ${cash_pnl:+.4f} ({percent_pnl:+.1f}%)")
         print("=" * 100)
         
+
+        sized_value = sizing_constraints(new_value - old_value)
+        if sized_value > 1:
+            print(f"✅ Sized value ({sized_value}) > 1, fazendo ordem de compra...")
+            response = make_order(price=avg_price, size=sized_value, side=BUY, token_id=asset)
+            print(f"📤 Response: {response}")
+            return response
+        elif sized_value <= -1:
+            print(f"⏭️  Sized value ({sized_value}) <= -1, fazendo ordem de venda...")
+            response = make_order(price=avg_price, size=sized_value, side=SELL, token_id=asset)
+            print(f"📤 Response: {response}")
+            return response
+        else:
+            print(f"⏭️  Sized value ({sized_value}) did not meet the criteria")
+            return None
         # Aqui você pode adicionar lógica específica para atualizações
         # Exemplo: Take profit se PnL% > 50%, Stop loss se < -20%, etc.
-        if percent_pnl >= 50:
-            print(f"🎉 PnL positivo de {percent_pnl}%! Considere realizar lucros.")
-        elif percent_pnl <= -20:
-            print(f"⚠️  PnL negativo de {percent_pnl}%! Considere stop loss.")
+        # if percent_pnl >= 50:
+        #     print(f"🎉 PnL positivo de {percent_pnl}%! Considere realizar lucros.")
+        # elif percent_pnl <= -20:
+        #     print(f"⚠️  PnL negativo de {percent_pnl}%! Considere stop loss.")
         
-        return None
+        # return None
     except Exception as e:
         print(f"❌ Erro ao processar atualização de posição: {e}")
         import traceback
@@ -339,7 +354,7 @@ def _start_polling_threads():
                     insert_player_positions_batch(positions)
             except Exception:
                 traceback.print_exc()
-            time.sleep(5)
+            time.sleep(6 * 60)
 
     threading.Thread(target=poll_history_loop, daemon=True).start()
     threading.Thread(target=poll_positions_loop, daemon=True).start()
