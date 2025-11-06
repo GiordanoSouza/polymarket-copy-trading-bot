@@ -34,7 +34,10 @@ def fetch_player_positions(user_address: str, limit: int = 500, offset: int = 0,
         response = requests.get(API_URL, params=params, timeout=5)
         response.raise_for_status()
         data = response.json()
-        print('data', data)
+        # print('data', data)
+        print('===============================================')
+        print('fetching positions from', user_address)
+        print('===============================================')
         print('data length', len(data))
         return data
     
@@ -99,30 +102,84 @@ def transform_position_to_db_format(position: dict) -> dict:
     }
 
 def insert_player_positions_batch(positions: list):
+    """
+    Insere ou atualiza posições apenas se houver mudanças significativas.
+    Compara com dados existentes para evitar UPDATEs desnecessários.
+    """
     if not positions:
         print("No positions to insert")
         return 0
 
     success_count = 0
     error_count = 0
+    skipped_count = 0
     
     for idx, position in enumerate(positions, 1):
         try:
-            # Transformar para formato do banco antes de inserir
+            # Transformar para formato do banco
             db_position = transform_position_to_db_format(position)
-            supabase.table(TABLE_NAME).upsert(
-                db_position,
+            asset_id = db_position['asset']
+            proxy_wallet = db_position['proxy_wallet']
+            
+            # Buscar registro existente no banco
+            existing = supabase.table(TABLE_NAME).select("*").eq(
+                "asset", asset_id
+            ).eq(
+                "proxy_wallet", proxy_wallet
             ).execute()
-            success_count += 1
+            
+            # Se não existe, INSERT
+            if not existing.data or len(existing.data) == 0:
+                supabase.table(TABLE_NAME).insert(db_position).execute()
+                success_count += 1
+                print(f"➕ Nova posição inserida: {db_position['title'][:50]}")
+            else:
+                # Existe, verificar se houve mudança
+                old_data = existing.data[0]
+                
+                # Campos importantes para comparar
+                fields_to_compare = [
+                    'size',
+                ]
+                
+                # Verificar se algum campo mudou
+                has_changes = False
+                for field in fields_to_compare:
+                    old_val = old_data.get(field)
+                    new_val = db_position.get(field)
+                    
+                    # Comparar com tolerância para floats
+                    if isinstance(old_val, (int, float)) and isinstance(new_val, (int, float)):
+                        if abs(old_val - new_val) > 0.1:  # Tolerância de 50
+                            has_changes = True
+                            print(f"🔄 Mudança detectada em '{field}': {old_val} → {new_val}")
+                            break
+                    elif old_val != new_val:
+                        has_changes = True
+                        print(f"🔄 Mudança detectada em '{field}': {old_val} → {new_val}")
+                        break
+                
+                # Só fazer UPDATE se houver mudanças
+                if has_changes:
+                    supabase.table(TABLE_NAME).update(db_position).eq(
+                        "asset", asset_id
+                    ).eq(
+                        "proxy_wallet", proxy_wallet
+                    ).execute()
+                    success_count += 1
+                    print(f"🔄 Posição atualizada: {db_position['title'][:50]}")
+                else:
+                    skipped_count += 1
+                    # print(f"⏭️  Posição inalterada: {db_position['title'][:50]}")
+                    
         except Exception as e:
             error_count += 1
             print(f"❌ Erro na posição {idx}/{len(positions)}: {e}")
             print(f"   Título: {position.get('title', 'N/A')}")
             print(f"   Asset: {position.get('asset', 'N/A')[:20]}...")
-            print(f"   end_date recebido: '{position.get('endDate')}'")
             # Continuar processando as próximas posições
     
-    print(f"\n✅ Resumo: {success_count} inseridas com sucesso, {error_count} com erro")
+    print(f"\n✅ Resumo: {success_count} inseridas/atualizadas, {skipped_count} inalteradas, {error_count} com erro")
     return success_count
 
 
@@ -155,8 +212,8 @@ def detect_big_positions(positions: list, size_limit: float = 1000.0):
     return big_positions
 
 if __name__ == '__main__':
-    user = '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b'
+    user = '0xB11D215dBA84Fa96F92DBB151D865E1776e05ddA'
     positions = fetch_player_positions(user_address=proxy_wallet_self)
-    # success_count = insert_player_positions_batch(positions)
+    insert_player_positions_batch(positions)
     # print(f"Success count: {success_count}")
-    print(positions[0])
+    print_positions_readable(positions)

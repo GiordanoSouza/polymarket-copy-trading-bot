@@ -315,7 +315,7 @@ async def run_all_listeners():
 
 def _start_polling_threads():
     """Start 5s polling threads for history and positions."""
-    user_addr = proxy_wallet_self or os.getenv("USER_ADDRESS")
+    user_addr = os.getenv("USER_ADDRESS")
     if not user_addr:
         print("No user address configured for polling; skipping background polling.")
         return
@@ -323,7 +323,7 @@ def _start_polling_threads():
     def poll_history_loop():
         while True:
             try:
-                activities = fetch_history_activities(user_addr, limit=50, offset=0)
+                activities = fetch_history_activities(user_addr, limit=500, offset=0)
                 if activities:
                     insert_history_batch(activities)
             except Exception:

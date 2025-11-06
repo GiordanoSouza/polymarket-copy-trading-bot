@@ -70,8 +70,11 @@ def fetch_activities(user_address: str, limit: int = 500, offset: int = 0):
 
     data = resp.json()
     db_activities = [transform_activity_to_db_format(activity) for activity in data]
-    print('db_activities', db_activities[0])
+    # print('db_activities', db_activities[0])
+    print('===============================================')
+    print('fetching activities from', user_address)
     print('db_activities length', len(db_activities))
+    print('===============================================')
     return db_activities
 
 
