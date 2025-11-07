@@ -281,16 +281,12 @@ Contributions to this **polymarket-copy-trading-bot** are welcome!
 - 🔧 Submit pull requests
 - ⭐ Star the repo if you find it useful
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for detailed guidelines.
 
 ### Roadmap
 
 - [ ] Web dashboard for monitoring
-- [ ] Multiple trader support
 - [ ] Advanced risk management features
-- [ ] Backtesting framework
 - [ ] Telegram/Discord notifications
-- [ ] Mobile app for monitoring
 
 ## 📄 License
 
@@ -305,11 +301,6 @@ This polymarket trading bot is licensed under the MIT License - see [`LICENSE`](
 - [Supabase](https://supabase.com/) - Database platform
 - [py-clob-client](https://github.com/Polymarket/py-clob-client) - Polymarket Python SDK
 
-## 📞 Support
-
-- 📧 **Issues**: [GitHub Issues](https://github.com/yourusername/cute_poly/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/cute_poly/discussions)
-- ⭐ **Star**: Give us a star if this polymarket bot helped you!
 
 ---
 
@@ -317,4 +308,8 @@ This polymarket trading bot is licensed under the MIT License - see [`LICENSE`](
 
 **Built with ❤️ for the Polymarket community**
 
+Contact: https://x.com/Giordanopsouza 🇧🇷
+
 *This polymarket copy trading bot helps traders automate their prediction market strategies. Star ⭐ the repo to support development!*
+
+
