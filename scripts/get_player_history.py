@@ -1,3 +1,7 @@
+'''
+OLDER VERSION OF THE SCRIPT
+USE get_player_history_new.py FOR THE NEW VERSION
+'''
 import requests
 from datetime import datetime, timedelta
 import time
@@ -260,13 +264,13 @@ def import_multiple_players(user_addresses: list, days_back: int = 365):
     print("🎉 IMPORTAÇÃO DE TODOS OS PLAYERS CONCLUÍDA!")
     print("=" * 100 + "\n")
 
-# Exemplo de uso
+# Example usage
 if __name__ == "__main__":
     # ============================================================
-    # CONFIGURAÇÃO: Adicione os endereços dos players aqui
+    # Player configuration
     # ============================================================
     
-    # Exemplo com um único player
+    # Example with a single player
     player_address = input("Enter player wallet address: ")
     if player_address:
         days_back = int(input("Enter days of history to fetch (default 365): ") or "365")
@@ -274,7 +278,7 @@ if __name__ == "__main__":
     else:
         print("No player address provided.")
     
-    # Ou importe múltiplos players de uma vez
+    # Or import multiple players at once
     # players = [
     #     "0x1234...abcd",  # Replace with actual addresses
     #     "0x5678...efgh",
