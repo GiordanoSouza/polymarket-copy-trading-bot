@@ -1,46 +1,44 @@
-# 🤖 Polymarket Copytrading Bot
+# 🤖 Polymarket Copy Trading Bot - Automated Prediction Market Trading
 
-An automated copytrading bot for Polymarket that monitors and replicates trades from experienced traders in real-time using Supabase and Python.
+**polymarket-copy-trading-bot for automated prediction market trading.** Mirror successful traders' strategies on Polymarket in real-time with a Python-based copytrading bot.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Polymarket](https://img.shields.io/badge/Polymarket-Compatible-green.svg)](https://polymarket.com/)
 
 ## 📋 Table of Contents
 
-- [About the Project](#about-the-project)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
+- [About This Polymarket Copy Trading Bot](#about-this-polymarket-copy-trading-bot)
+- [Key Features](#key-features)
+- [How It Works](#how-it-works)
+- [Quick Start](#quick-start)
+- [Configuration Guide](#configuration-guide)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Risk Management](#risk-management)
 - [Contributing](#contributing)
 - [License](#license)
-- [Important Warnings](#important-warnings)
 
-## 🎯 About the Project
+## 🎯 About This Polymarket Copy Trading Bot
 
-This bot allows you to automatically copy trades from successful traders on Polymarket. It monitors activities in real-time, applies customizable risk filters, and executes orders automatically with integrated capital management.
+ **polymarket-copy-trading-bot** is an automated trading system designed to replicate the trading strategies of successful Polymarket traders in real-time. Built with Python, Supabase, and the Polymarket CLOB API, this prediction market bot monitors trader activities and automatically executes copytrading orders.
 
-**Key Features:**
-- ⚡ Real-time monitoring via Supabase Realtime
-- 🎯 Advanced filtering system (odds, liquidity, slippage)
-- 💰 Capital management with Kelly Criterion
-- 🛡️ Protections: stop-loss, take-profit, time-stops
-- 📊 Complete tracking of positions and history
-- ⚙️ Highly configurable via YAML
+## ✨ Key Features
 
-## ✨ Features
+### Automated Copytrading for Polymarket
 
-### Real-Time Monitoring
-- **Trades**: Detects new trades from target trader instantly
-- **Positions**: Monitors opening of new positions
-- **Updates**: Tracks changes in existing positions (P&L, size)
+This **polymarket copy trading bot** provides:
 
-### Capital Management
-- Sizing based on percentage of copied trader
+- **Real-Time Trade Detection**: Monitors target trader's activities instantly
+- **Automatic Order Execution**: Places orders on Polymarket automatically
+- **Position Tracking**: Tracks all open positions and P&L in real-time
+- **Flexible Sizing**: Copy trades at any percentage of the original size
+- **Supabase Integration**: Reliable database for trade history and monitoring
 
+## 🏗️ How It Works
 
-## 🏗️ Architecture
+**automated polymarket trading bot** operates in simple steps:
+
+### Architecture
 
 ```
 ┌─────────────────┐
@@ -82,172 +80,241 @@ This bot allows you to automatically copy trades from successful traders on Poly
 
 ### Data Flow
 
-1. **Collection**: Scripts poll Polymarket API for trader activities
-2. **Storage**: Data is inserted into Supabase (history and positions)
-3. **Detection**: Bot detects changes via Supabase Realtime
-4. **Processing**: Handlers apply filters and validations
-5. **Execution**: Orders are sent to Polymarket CLOB API
-6. **Tracking**: Positions are monitored continuously
+1. **Monitor**: The bot continuously monitors your target trader via Polymarket API
+2. **Detect**: Real-time detection of new trades through Supabase
+3. **Execute**: Automatically places scaled orders on your Polymarket account
+4. **Track**: Maintains complete history of all copytraded positions
 
-## 📋 Prerequisites
+## 🚀 Quick Start
 
-- **Python 3.9+**
-- **Polymarket account** with configured wallet
-- **Supabase account** (free tier works)
-- **USDC** in your Polymarket wallet for trading
-- **Private Key** from your wallet (to sign orders)
+Get your **polymarket-copy-trading-bot** running in 5 minutes:
 
-## 🚀 Installation
+### Prerequisites
 
-### 1. Clone the Repository
+- Python 3.9 or higher
+- Polymarket account with USDC
+- Supabase account (free tier works)
+- Private key from your Polymarket wallet
+
+### Installation
+
+1. **Clone the polymarket bot repository**
 ```bash
 git clone https://github.com/yourusername/cute_poly.git
 cd cute_poly
 ```
 
-### 2. Create a Virtual Environment
+2. **Set up Python environment**
 ```bash
 python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# Linux/Mac
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure Supabase
+3. **Configure Supabase Database**
 
-Follow instructions in [`supabase/README.md`](supabase/README.md) to:
-- Create necessary tables
-- Obtain access credentials
+Create your Supabase project and run the setup:
 
-## ⚙️ Configuration
-### 1. Configure Environment Variables
+- Go to [supabase.com](https://supabase.com/) and create a project
+- Navigate to SQL Editor
+- Copy and execute the SQL from `supabase/create_table.sql`
+- Get your project URL and anon key from Settings → API
 
-Copy the example file and fill with your credentials:
+4. **Configure your copytrading bot**
 
+Copy the example environment file:
 ```bash
 cp env.example .env
 ```
-Edit `.env` with your information:
+
+Edit `.env` with your credentials:
 
 ```env
-# Supabase
+# Supabase Configuration
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-anon-key
+SUPABASE_KEY=your-anon-key-here
 
-# Polymarket
+# Polymarket Credentials
 PK=your-private-key-here
 POLY_FUNDER=your-polymarket-proxy-address
 PROXY_WALLET_SELF=your-wallet-address
 
-# Trader to copy
-TRADER_WALLET=trader-wallet-to-copy
+# Trader to Copy
+TRADER_WALLET=trader-wallet-address-to-copy
+
+# Optional: Sizing Configuration
+BANKROLL=500
+STAKE_WHALE_PCT=0.001
 ```
 
-📝 **See [`SETUP.md`](SETUP.md) for detailed instructions on obtaining each credential.**
+**Getting Your Credentials:**
 
-### 2. Adjust the Strategy
+- **Private Key**: Go to [reveal.magic.link/polymarket](https://reveal.magic.link/polymarket) and reveal your key
+- **Proxy Address**: Found under your profile picture on Polymarket
+- **Trader Wallet**: Copy from any trader's profile on Polymarket
 
-Edit `config.yaml` to configure:
-
-```yaml
-bankroll: 1000  # Your capital in USDT
-sizing:
-  stake_whale_pct: 0.005  # Copy 0.5% of trader's size
-
-```
-
-## 🎮 Usage
-
-### Run the Main Bot
+5. **Run your polymarket copy trading bot**
 
 ```bash
 cd scripts
 python main.py
 ```
 
-The bot will:
-1. Load and validate configurations
-2. Connect to Supabase
-3. Start activity polling (background)
-4. Start real-time listeners
-5. Process and execute trades automatically
+That's it! Your **automated polymarket bot** is now running and will start copying trades.
 
-### Test Configuration
+## ⚙️ Configuration Guide
+
+### Environment Variables
+
+All configuration for this **polymarket trading bot** is done via `.env`:
+
+#### Required Settings
+
+```env
+SUPABASE_URL=          # Your Supabase project URL
+SUPABASE_KEY=          # Supabase anon/public key
+PK=                    # Your Polymarket private key
+POLY_FUNDER=           # Your Polymarket proxy address
+PROXY_WALLET_SELF=     # Your wallet address
+```
+
+#### Optional Settings
+
+```env
+TRADER_WALLET=         # Trader to copy (can be changed anytime)
+BANKROLL=500          # Your trading capital (default: 1000)
+STAKE_WHALE_PCT=0.001 # Copy 0.1% of trader's size (default: 0.005)
+```
+
+### Position Sizing Examples
+
+The **copytrading bot** scales trades automatically:
+
+- If whale bets $10,000 and you set `STAKE_WHALE_PCT=0.001`
+  - Your bot will place a $10 trade (10,000 × 0.001)
+- If whale bets $5,000 and you set `STAKE_WHALE_PCT=0.002`
+  - Your bot will place a $10 trade (5,000 × 0.002)
+
+### Finding Profitable Traders to Copy
+
+Visit [polymarket.com/leaderboard](https://polymarket.com/leaderboard) to find:
+
+## 🎮 Usage
+
+### Starting the Bot
+
+```bash
+python scripts/main.py
+```
+
+The **polymarket copy trading bot** will:
+1. ✅ Validate all credentials
+2. ✅ Connect to Supabase database
+3. ✅ Start monitoring your target trader
+4. ✅ Automatically execute copytrading orders
+
+### Testing Configuration
+
+Verify your setup before live trading:
 
 ```bash
 python scripts/config.py
 ```
 
-This will validate your credentials and display a configuration summary.
+This will display your current configuration and validate all credentials.
+
+### Monitoring Your Bot
+
+The bot provides real-time console output showing:
+- New trades detected from target trader
+- Position updates and P&L changes
+- Orders placed on your account
+- Connection status and errors
 
 ## 📁 Project Structure
 
 ```
-cute_poly/
+cute_poly/                          # Polymarket copy trading bot
 ├── scripts/
-│   ├── main.py                      # Main bot with listeners
-│   ├── config.py                    # Centralized config management
-│   ├── make_orders.py               # Order execution on Polymarket
-│   ├── get_player_history_new.py   # Fetch trade history
-│   ├── get_player_positions.py     # Fetch current positions
-│   ├── listen_to_order.py          # Order listener
+│   ├── main.py                    # Main bot application
+│   ├── config.py                  # Configuration management
+│   ├── make_orders.py             # Order execution
+│   ├── get_player_positions.py   # Position tracking
+│   ├── get_player_history_new.py # Trade history
 │   └── constraints/
-│       ├── eligibility.py           # Eligibility validations
-│       ├── sizing.py                # Position size calculations
-│       ├── risk.py                  # Risk controls
-│       ├── exits.py                 # Exit logic
-│       └── validators.py            # General validators
+│       └── sizing.py              # Position sizing logic
 ├── supabase/
-│   ├── create_table.sql            # Database schema
-│   ├── insert_activities.py        # Activity insertion
-│   ├── polling_activities.py       # Continuous polling
-│   └── README.md                   # Supabase docs
-├── config.yaml                     # Strategy configuration
-├── env.example                     # Environment variables template
-├── requirements.txt                # Python dependencies
-├── README.md                       # This file
-├── SETUP.md                        # Detailed setup guide
-├── CONTRIBUTING.md                 # Contribution guidelines
-└── LICENSE                         # Project license
+│   ├── create_table.sql           # Database schema
+│   └── README.md                  # Supabase setup guide
+├── env.example                    # Configuration template
+├── requirements.txt               # Python dependencies
+├── README.md                      # This file
+└── LICENSE                        # MIT License
 ```
+
+## 🛡️ Risk Management
+
+### Important Notes for Polymarket Trading
+
+- ⚠️ **Start Small**: Test with minimal capital ($50-100) first
+- ⚠️ **Monitor Daily**: Check your bot's performance regularly
+- ⚠️ **Understand Risks**: Prediction market trading involves capital risk
+- ⚠️ **Secure Keys**: Never share your private keys
+- ⚠️ **Use Test Wallet**: Consider using a separate wallet for the bot
+
+### Position Sizing Tips
+
+1. Set `STAKE_WHALE_PCT` conservatively (0.001 = 0.1%)
+2. Adjust `BANKROLL` to your actual available capital
+3. Monitor the trader's performance before increasing position sizes
+4. Keep some capital in reserve for market opportunities
 
 ## 🤝 Contributing
 
-Contributions are welcome! See [`CONTRIBUTING.md`](CONTRIBUTING.md) for:
-- How to report bugs
-- How to suggest features
-- Code standards
-- Pull Request process
+Contributions to this **polymarket-copy-trading-bot** are welcome!
 
-### Areas Needing Help
+### Ways to Contribute
 
-- [ ] Web interface for monitoring
+- 🐛 Report bugs and issues
+- 💡 Suggest new features
+- 📝 Improve documentation
+- 🔧 Submit pull requests
+- ⭐ Star the repo if you find it useful
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for detailed guidelines.
+
+### Roadmap
+
+- [ ] Web dashboard for monitoring
+- [ ] Multiple trader support
+- [ ] Advanced risk management features
 - [ ] Backtesting framework
-- [ ] More sizing strategies
-- [ ] Analytics dashboard
-- [ ] Automated tests
-- [ ] Documentation improvements
+- [ ] Telegram/Discord notifications
+- [ ] Mobile app for monitoring
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [`LICENSE`](LICENSE) file for details.
+This polymarket trading bot is licensed under the MIT License - see [`LICENSE`](LICENSE) for details.
 
-### Support
+**Disclaimer**: This is an educational tool. Trading prediction markets involves financial risk. Use at your own discretion. Always start with small amounts and never invest more than you can afford to lose.
 
-- 📧 Issues: [GitHub Issues](https://github.com/yourusername/cute_poly/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/cute_poly/discussions)
-- 📚 Docs: [Wiki](https://github.com/yourusername/cute_poly/wiki)
+## 🔗 Related Resources
+
+- [Polymarket](https://polymarket.com/) - Official Polymarket platform
+- [Polymarket Docs](https://docs.polymarket.com/) - API documentation
+- [Supabase](https://supabase.com/) - Database platform
+- [py-clob-client](https://github.com/Polymarket/py-clob-client) - Polymarket Python SDK
+
+## 📞 Support
+
+- 📧 **Issues**: [GitHub Issues](https://github.com/yourusername/cute_poly/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/cute_poly/discussions)
+- ⭐ **Star**: Give us a star if this polymarket bot helped you!
 
 ---
 
+**Keywords**: polymarket-copy-trading-bot, polymarket bot, prediction market bot, automated trading bot, polymarket automation, copy trading polymarket, polymarket mirror trading, crypto prediction markets
+
 **Built with ❤️ for the Polymarket community**
 
-*If this project helped you, consider giving it a ⭐ on GitHub!*
+*This polymarket copy trading bot helps traders automate their prediction market strategies. Star ⭐ the repo to support development!*
