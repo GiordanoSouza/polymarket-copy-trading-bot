@@ -1,5 +1,4 @@
--- Tabela para armazenar atividades do Polymarket
-CREATE TABLE IF NOT EXISTS polymarket_activities (
+CREATE TABLE historic_trades (
     id BIGSERIAL PRIMARY KEY,
     proxy_wallet VARCHAR(255) NOT NULL,
     timestamp BIGINT NOT NULL,
@@ -28,8 +27,7 @@ CREATE TABLE IF NOT EXISTS polymarket_activities (
 );
 
 
-
-CREATE TABLE IF NOT EXISTS polymarket_positions (
+CREATE TABLE polymarket_positions (
     proxy_wallet        CHAR(42)        NOT NULL,
     asset               NUMERIC(78, 0)  NOT NULL,
     condition_id        CHAR(66)        NOT NULL,
@@ -61,20 +59,10 @@ CREATE TABLE IF NOT EXISTS polymarket_positions (
     PRIMARY KEY (proxy_wallet, asset)
 );
 
--- Índices para melhorar performance de consultas
-CREATE INDEX IF NOT EXISTS idx_proxy_wallet ON polymarket_activities(proxy_wallet);
-CREATE INDEX IF NOT EXISTS idx_timestamp ON polymarket_activities(timestamp DESC);
-CREATE INDEX IF NOT EXISTS idx_type ON polymarket_activities(type);
-CREATE INDEX IF NOT EXISTS idx_event_slug ON polymarket_activities(event_slug);
-CREATE INDEX IF NOT EXISTS idx_activity_datetime ON polymarket_activities(activity_datetime DESC);
-
--- Comentários nas colunas
-COMMENT ON TABLE polymarket_activities IS 'Armazena todas as atividades (trades, yields, etc) dos usuários do Polymarket';
-COMMENT ON COLUMN polymarket_activities.proxy_wallet IS 'Endereço da carteira proxy do usuário';
-COMMENT ON COLUMN polymarket_activities.timestamp IS 'Unix timestamp da atividade';
-COMMENT ON COLUMN polymarket_activities.activity_datetime IS 'Data/hora convertida da atividade';
-COMMENT ON COLUMN polymarket_activities.transaction_hash IS 'Hash único da transação na blockchain';
-COMMENT ON COLUMN polymarket_activities.type IS 'Tipo de atividade: TRADE, YIELD, etc';
-COMMENT ON COLUMN polymarket_activities.side IS 'Lado da operação: BUY ou SELL';
-
-
+ALTER TABLE historic_trades 
+ADD COLUMN unique_activity_key VARCHAR(500) 
+GENERATED ALWAYS AS (
+    transaction_hash || '_' || 
+    COALESCE(condition_id, 'null') || '_' || 
+    COALESCE(price::text, 'null')
+) STORED;
