@@ -60,7 +60,7 @@ CREATE TABLE polymarket_positions (
 );
 
 ALTER TABLE historic_trades 
-ADD COLUMN unique_activity_key VARCHAR(500) 
+ADD COLUMN unique_key VARCHAR(500) 
 GENERATED ALWAYS AS (
     transaction_hash || '_' || 
     COALESCE(condition_id, 'null') || '_' || 

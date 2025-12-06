@@ -100,7 +100,7 @@ Get your **polymarket-copy-trading-bot** running in 5 minutes:
 
 1. **Clone the polymarket bot repository**
 ```bash
-git clone https://github.com/yourusername/polymarket-copy-trading-bot.git
+git clone https://github.com/giordanopsouza/polymarket-copy-trading-bot.git
 cd polymarket-copy-trading-bot
 ```
 
