@@ -118,7 +118,7 @@ Create your Supabase project and run the setup:
 - Go to [supabase.com](https://supabase.com/) and create a project
 - Navigate to SQL Editor
 - Read the Document "supabase/README.md"
-- Get your project URL and anon key from Settings → API
+- Get your project URL and anon key from Settings → API and Data API
 
 4. **Configure your copytrading bot**
 
@@ -137,7 +137,6 @@ SUPABASE_KEY=your-anon-key-here
 # Polymarket Credentials
 PK=your-private-key-here
 POLY_FUNDER=your-polymarket-proxy-address
-PROXY_WALLET_SELF=your-wallet-address
 
 # Trader to Copy
 TRADER_WALLET=trader-wallet-address-to-copy
@@ -174,13 +173,13 @@ SUPABASE_URL=          # Your Supabase project URL
 SUPABASE_KEY=          # Supabase anon/public key
 PK=                    # Your Polymarket private key
 POLY_FUNDER=           # Your Polymarket proxy address
-PROXY_WALLET_SELF=     # Your wallet address
+TRADER_WALLET=         # Trader wallet address to copy
 ```
 
 #### Optional Settings
 
 ```env
-TRADER_WALLET=         # Trader to copy (can be changed anytime)
+TRADER_WALLET=         # Trader wallet address to copy (can be changed anytime)
 BANKROLL=500          # Your trading capital (default: 1000)
 STAKE_WHALE_PCT=0.001 # Copy 0.1% of trader's size (default: 0.005)
 ```

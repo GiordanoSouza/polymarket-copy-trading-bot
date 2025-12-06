@@ -1,1 +1,1 @@
-# Tipos customizados para constraints (dataclasses e enums)
+# Custom types for constraints (dataclasses and enums)

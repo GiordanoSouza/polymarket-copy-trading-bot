@@ -1,7 +1,7 @@
 import requests
 
 def has_already_an_open_position(user: str, market: str) -> bool:
-    """Verifica se o usuário tem posição aberta no mercado especificado."""
+    """Checks if the user has an open position in the specified market."""
     try:
         resp = requests.get(
             "https://data-api.polymarket.com/positions",
@@ -19,6 +19,6 @@ if __name__ == "__main__":
     
     if user_address and market_address:
         result = has_already_an_open_position(user_address, market_address)
-        print(f"Tem posição aberta: {result}")
+        print(f"Has open position: {result}")
     else:
         print("Please provide both user and market addresses.")

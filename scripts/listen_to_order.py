@@ -27,13 +27,13 @@
 
 # async def listen_to_trades():
 #     """
-#     Inicia o listener para novas trades
+#     Starts listener for new trades
 #     """
-#     print("🔍 Iniciando listener de trades...")
-#     print(f"📊 Monitorando tabela: {TABLE_NAME}")
+#     print("🔍 Starting trades listener...")
+#     print(f"📊 Monitoring table: {TABLE_NAME}")
 #     print()
     
-#     # Criar cliente ASSÍNCRONO
+#     # Create ASYNC client
 #     supabase: AsyncClient = await acreate_client(url, key)
 
 #     response = (
@@ -42,18 +42,18 @@
 #     .subscribe()
 #     )
     
-#     print("✅ Conectado! Aguardando novas trades...")
-#     print("   (Pressione Ctrl+C para parar)\n")
+#     print("✅ Connected! Waiting for new trades...")
+#     print("   (Press Ctrl+C to stop)\n")
     
-#     # Manter o script rodando
+#     # Keep the script running
 #     try:
 #         while True:
 #             await asyncio.sleep(1)
 #     except KeyboardInterrupt:
 #         await response.unsubscribe()
-#         print("✅ Desconectado com sucesso!")
+#         print("✅ Successfully disconnected!")
     
     
 # if __name__ == "__main__":
-#     # Executar o listener assíncrono
+#     # Run the async listener
 #     asyncio.run(listen_to_trades())

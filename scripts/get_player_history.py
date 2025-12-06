@@ -1,6 +1,9 @@
 '''
 OLDER VERSION OF THE SCRIPT
 USE get_player_history_new.py FOR THE NEW VERSION
+
+
+
 '''
 import requests
 from datetime import datetime, timedelta
@@ -22,21 +25,21 @@ MAX_LIMIT = 500  # Limite máximo da API
 TABLE_NAME = "historic_trades"
 
 def get_timestamp_one_year_ago():
-    """Calcula o timestamp de 1 ano atrás"""
+    """Calculates the timestamp from 1 year ago"""
     one_year_ago = datetime.now() - timedelta(days=365)
     return int(one_year_ago.timestamp())
 
 def fetch_activities(user_address: str, limit: int = 500, offset: int = 0):
     """
-    Busca atividades de um usuário na API do Polymarket
+    Fetches user activities from Polymarket API
     
     Args:
-        user_address: Endereço da carteira do usuário
-        limit: Número máximo de registros por requisição (máx 500)
-        offset: Número de registros para pular (paginação)
+        user_address: User wallet address
+        limit: Maximum number of records per request (max 500)
+        offset: Number of records to skip (pagination)
     
     Returns:
-        Lista de atividades ou None em caso de erro
+        List of activities or None in case of error
     """
     try:
         params = {
@@ -53,20 +56,20 @@ def fetch_activities(user_address: str, limit: int = 500, offset: int = 0):
         return response.json()
     
     except requests.exceptions.RequestException as e:
-        print(f"❌ Erro na requisição (offset {offset}): {e}")
+        print(f"❌ Request error (offset {offset}): {e}")
         return None
 
 def transform_activity_to_db_format(activity: dict) -> dict:
     """
-    Transforma o formato da API para o formato do banco de dados
+    Transforms API format to database format
     
     Args:
-        activity: Dicionário com dados da API
+        activity: Dictionary with API data
     
     Returns:
-        Dicionário formatado para inserção no banco
+        Dictionary formatted for database insertion
     """
-    # Converter timestamp para datetime
+    # Convert timestamp to datetime
     
     activity_datetime = datetime.fromtimestamp(activity['timestamp'])
     
@@ -97,18 +100,18 @@ def transform_activity_to_db_format(activity: dict) -> dict:
 
 def insert_activities_batch(activities: list):
     """
-    Insere um lote de atividades no Supabase
+    Inserts a batch of activities into Supabase
     
     Args:
-        activities: Lista de atividades formatadas para o banco
+        activities: List of activities formatted for the database
     
     Returns:
-        Tupla (sucesso, duplicados, erros)
+        Tuple (success, duplicates, errors)
     """
 
     
     if not activities:
-        print("⚠️ Nenhuma atividade para inserir")
+        print("⚠️ No activities to insert")
         return None
     
     success_count = 0
@@ -116,12 +119,12 @@ def insert_activities_batch(activities: list):
     error_count = 0
     
     for activity in activities:
-        # Gerar a chave única composta (mesma lógica da coluna computed)
+        # Generate the compound unique key (same logic as computed column)
         condition_id = activity.get('condition_id') or 'null'
         price = str(activity.get('price')) if activity.get('price') is not None else 'null'
         unique_key = f"{activity['transaction_hash']}_{condition_id}_{price}"
         try:
-            # Tentar inserir no banco
+            # Try to insert into database
             existing = supabase.table(TABLE_NAME).select("id").eq(
                     "unique_activity_key", unique_key
                 ).execute()
@@ -134,32 +137,32 @@ def insert_activities_batch(activities: list):
                 
         except Exception as e:
             error_msg = str(e).lower()
-            # Verificar se é erro de duplicata (transaction_hash UNIQUE)
+            # Check if it's a duplicate error (transaction_hash UNIQUE)
             if 'duplicate' in error_msg or 'unique' in error_msg:
                 duplicate_count += 1
             else:
                 error_count += 1
-                print(f"   ⚠️  Erro ao inserir atividade: {e}")
+                print(f"   ⚠️  Error inserting activity: {e}")
     
     return success_count, duplicate_count, error_count
 
 def import_player_history(user_address: str, days_back: int = 365):
     """
-    Importa todo o histórico de um player dos últimos N dias
+    Imports all player history from the last N days
     
     Args:
-        user_address: Endereço da carteira do usuário
-        days_back: Número de dias para buscar no histórico (padrão: 365 = 1 ano)
+        user_address: User wallet address
+        days_back: Number of days to fetch from history (default: 365 = 1 year)
     """
     print("=" * 100)
-    print(f"🚀 INICIANDO IMPORTAÇÃO DE HISTÓRICO")
+    print(f"🚀 STARTING HISTORY IMPORT")
     print("=" * 100)
     print(f"📍 Player: {user_address}")
-    print(f"📅 Período: Últimos {days_back} dias")
-    print(f"🗄️  Tabela: {TABLE_NAME}")
+    print(f"📅 Period: Last {days_back} days")
+    print(f"🗄️  Table: {TABLE_NAME}")
     print("=" * 100 + "\n")
     
-    # Timestamp limite (1 ano atrás)
+    # Timestamp limit (1 year ago)
     timestamp_limit = int((datetime.now() - timedelta(days=days_back)).timestamp())
     
     offset = 0
@@ -170,83 +173,83 @@ def import_player_history(user_address: str, days_back: int = 365):
     continue_fetching = True
     
     while continue_fetching:
-        print(f"📥 Buscando atividades (offset: {offset}, limit: {MAX_LIMIT})...")
+        print(f"📥 Fetching activities (offset: {offset}, limit: {MAX_LIMIT})...")
         
-        # Buscar atividades da API
+        # Fetch activities from API
         activities = fetch_activities(user_address, limit=MAX_LIMIT, offset=offset)
         print('activities', activities[0])
         if not activities or len(activities) == 0:
-            print(f"✅ Nenhuma atividade retornada. Fim da paginação.\n")
+            print(f"✅ No activities returned. End of pagination.\n")
             break
         
-        print(f"   ✓ Recebidas: {len(activities)} atividades")
+        print(f"   ✓ Received: {len(activities)} activities")
         total_fetched += len(activities)
         
-        # Filtrar atividades dentro do período de 1 ano
+        # Filter activities within the period
         activities_in_range = []
         for activity in activities:
             if activity.get('timestamp') and activity['timestamp'] >= timestamp_limit:
                 activities_in_range.append(activity)
             else:
-                # Se encontramos uma atividade fora do período, paramos a busca
+                # If we find an activity outside the period, stop the search
                 continue_fetching = False
                 break
         
         if len(activities_in_range) == 0:
-            print(f"   ⏹️  Todas as atividades estão fora do período de {days_back} dias.\n")
+            print(f"   ⏹️  All activities are outside the {days_back} days period.\n")
             break
         
-        print(f"   ✓ No período: {len(activities_in_range)} atividades")
+        print(f"   ✓ In period: {len(activities_in_range)} activities")
         
-        # Transformar para formato do banco
+        # Transform to database format
         db_activities = [transform_activity_to_db_format(act) for act in activities_in_range]
         
-        # Inserir no banco
-        print(f"   💾 Inserindo no Supabase...")
+        # Insert into database
+        print(f"   💾 Inserting into Supabase...")
         success, duplicates, errors = insert_activities_batch(db_activities)
         
         total_inserted += success
         total_duplicates += duplicates
         total_errors += errors
         
-        print(f"   ✓ Inseridos: {success} | Duplicados: {duplicates} | Erros: {errors}\n")
+        print(f"   ✓ Inserted: {success} | Duplicates: {duplicates} | Errors: {errors}\n")
         
-        # Se recebemos menos que o limite, chegamos ao fim
+        # If we received less than the limit, we reached the end
         if len(activities) < MAX_LIMIT:
-            print(f"✅ Última página alcançada (recebidas {len(activities)} < {MAX_LIMIT}).\n")
+            print(f"✅ Last page reached (received {len(activities)} < {MAX_LIMIT}).\n")
             break
         
-        # Se não está mais no período de interesse, parar
+        # If no longer in the period of interest, stop
         if not continue_fetching:
-            print(f"⏹️  Período de {days_back} dias alcançado. Parando busca.\n")
+            print(f"⏹️  Period of {days_back} days reached. Stopping search.\n")
             break
         
-        # Próxima página
+        # Next page
         offset += MAX_LIMIT
         
-        # Pequeno delay para não sobrecarregar a API
+        # Small delay to not overload the API
         time.sleep(0.5)
     
-    # Resumo final
+    # Final summary
     print("=" * 100)
-    print("📊 RESUMO DA IMPORTAÇÃO")
+    print("📊 IMPORT SUMMARY")
     print("=" * 100)
-    print(f"📥 Total de atividades buscadas: {total_fetched}")
-    print(f"✅ Total inseridas com sucesso: {total_inserted}")
-    print(f"🔄 Total de duplicadas (ignoradas): {total_duplicates}")
-    print(f"❌ Total de erros: {total_errors}")
+    print(f"📥 Total activities fetched: {total_fetched}")
+    print(f"✅ Total successfully inserted: {total_inserted}")
+    print(f"🔄 Total duplicates (ignored): {total_duplicates}")
+    print(f"❌ Total errors: {total_errors}")
     print("=" * 100 + "\n")
 
 def import_multiple_players(user_addresses: list, days_back: int = 365):
     """
-    Importa o histórico de múltiplos players
+    Imports history for multiple players
     
     Args:
-        user_addresses: Lista de endereços de carteiras
-        days_back: Número de dias para buscar no histórico
+        user_addresses: List of wallet addresses
+        days_back: Number of days to fetch from history
     """
     print("\n" + "=" * 100)
-    print(f"🎯 IMPORTAÇÃO DE {len(user_addresses)} PLAYERS")
+    print(f"🎯 IMPORT OF {len(user_addresses)} PLAYERS")
     print("=" * 100 + "\n")
     
     for i, address in enumerate(user_addresses, 1):
@@ -256,12 +259,12 @@ def import_multiple_players(user_addresses: list, days_back: int = 365):
         
         import_player_history(address, days_back)
         
-        # Delay entre players
+        # Delay between players
         if i < len(user_addresses):
             time.sleep(1)
     
     print("\n" + "=" * 100)
-    print("🎉 IMPORTAÇÃO DE TODOS OS PLAYERS CONCLUÍDA!")
+    print("🎉 IMPORT OF ALL PLAYERS COMPLETED!")
     print("=" * 100 + "\n")
 
 # Example usage

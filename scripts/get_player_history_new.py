@@ -20,13 +20,13 @@ TABLE_NAME = config.TABLE_NAME_TRADES
 
 def transform_activity_to_db_format(activity: dict) -> dict:
     """
-    Transforma o formato da API para o formato do banco de dados
+    Transforms API format to database format
     
     Args:
-        activity: Dicionário com dados da API
+        activity: Dictionary with API data
     
     Returns:
-        Dicionário formatado para inserção no banco
+        Dictionary formatted for database insertion
     """
     # Converter timestamp para datetime
     

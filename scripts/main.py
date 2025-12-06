@@ -23,7 +23,7 @@ config = get_config()
 # Config Supabase (from centralized config)
 url: str = config.SUPABASE_URL
 key: str = config.SUPABASE_KEY
-proxy_wallet_self = config.PROXY_WALLET_SELF
+trader_wallet = config.TRADER_WALLET
 TABLE_NAME_TRADES = config.TABLE_NAME_TRADES
 TABLE_NAME_POSITIONS = config.TABLE_NAME_POSITIONS
 
@@ -32,7 +32,7 @@ _supabase_client: AsyncClient = None
 
 async def get_supabase() -> AsyncClient:
     """
-    Retorna uma instância singleton do cliente Supabase
+    Returns a singleton instance of the Supabase client
     """
     global _supabase_client
     if _supabase_client is None:
@@ -42,7 +42,7 @@ async def get_supabase() -> AsyncClient:
 
 def handle_new_trade(payload):
     """
-    Handler para novas trades inseridas
+    Handler for new inserted trades
     """
     try:
         record = payload.get('data', {}).get('record', {})
@@ -57,7 +57,7 @@ def handle_new_trade(payload):
         condition_id = record.get('condition_id')
         
         print("\n" + "=" * 100)
-        print(f"🔍 Nova trade recebida! [{datetime.now().strftime('%H:%M:%S')}]")
+        print(f"🔍 New trade received! [{datetime.now().strftime('%H:%M:%S')}]")
         print(f"📝 Title: {title}")
         print(f"🔑 Transaction Hash: {transaction_hash}")
         print(f"💰 USDC Size: {usdc_size}")
@@ -69,7 +69,7 @@ def handle_new_trade(payload):
         if side == SELL:
             print(f"⏭️  Side is SELL, checking the % of the position from the TRADER")
             data_trader = fetch_player_positions(user_address=proxy_wallet, condition_id=condition_id)
-            data_myself = fetch_player_positions(user_address=proxy_wallet_self, condition_id=condition_id)
+            data_myself = fetch_player_positions(user_address=trader_wallet, condition_id=condition_id)
             size_trader = data_trader[0].get('size')
             size_myself = data_myself[0].get('size')
             percentage_position = usdc_size / size_trader
@@ -81,21 +81,21 @@ def handle_new_trade(payload):
             print(f"⏭️  Side is BUY, checking if size is greater than 1")
             sized_price = sizing_constraints(usdc_size)
             if sized_price >= 1:
-                print(f"✅ Sized price ({sized_price}) >= 1, fazendo ordem...")
+                print(f"✅ Sized price ({sized_price}) >= 1, placing order...")
                 response = make_order(price=price, size=sizing_constraints(size), side=side, token_id=token_id)
                 print(f"📤 Response: {response}")
                 return response 
             else:
-                print(f"⏭️  Sized price ({sized_price}) < 1, pulando ordem")
+                print(f"⏭️  Sized price ({sized_price}) < 1, skipping order")
                 return None
     except Exception as e:
-        print(f"❌ Erro ao processar nova trade: {e}")
+        print(f"❌ Error processing new trade: {e}")
         return None
 
 
 def handle_new_position(payload):
     """
-    Handler para novas posições inseridas
+    Handler for new inserted positions
     """
     try:
         record = payload.get('data', {}).get('record', {})
@@ -110,7 +110,7 @@ def handle_new_position(payload):
         proxy_wallet = record.get('proxyWallet', 'N/A')
 
         print("\n" + "=" * 100)
-        print(f"📈 Nova posição recebida! [{datetime.now().strftime('%H:%M:%S')}]")
+        print(f"📈 New position received! [{datetime.now().strftime('%H:%M:%S')}]")
         print(f"📝 Title: {title}")
         print(f"🎲 Outcome: {outcome}")
         print(f"🎯 Asset: {asset}")
@@ -123,15 +123,15 @@ def handle_new_position(payload):
         sized_value = sizing_constraints(initial_value)
         
         if sized_value > 1:
-            print(f"✅ Sized value ({sized_value}) > 1, fazendo ordem de compra...")
+            print(f"✅ Sized value ({sized_value}) > 1, placing buy order...")
             response = make_order(price=avg_price, size=sizing_constraints(size), side=BUY, token_id=asset)
             print(f"📤 Response: {response}")
             return response 
         else:
-            print(f"⏭️  Sized value ({sized_value}) <= 1, pulando posição")
+            print(f"⏭️  Sized value ({sized_value}) <= 1, skipping position")
             return None
     except Exception as e:
-        print(f"❌ Erro ao processar nova posição: {e}")
+        print(f"❌ Error processing new position: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -139,7 +139,7 @@ def handle_new_position(payload):
 
 def handle_update_position(payload):
     """
-    Handler para atualizações de posições existentes
+    Handler for updates to existing positions
     """
     try:
         old_record = payload.get('data', {}).get('old_record', {})
@@ -155,32 +155,32 @@ def handle_update_position(payload):
         old_size = old_record.get('size', 0)
         new_size = new_record.get('size', 0)
         
-        # Informações de PnL
+        # PnL information
         cash_pnl = new_record.get('cash_pnl', 0)
         percent_pnl = new_record.get('percent_pnl', 0)
         cur_price = new_record.get('cur_price', 0)
         avg_price = new_record.get('avg_price', 0)
         
         print("\n" + "=" * 100)
-        print(f"🔄 Atualização de posição recebida! [{datetime.now().strftime('%H:%M:%S')}]")
+        print(f"🔄 Position update received! [{datetime.now().strftime('%H:%M:%S')}]")
         print(f"📝 Title: {title}")
         print(f"🎲 Outcome: {outcome}")
         print(f"🎯 Asset: {asset}")
-        print(f"💰 Valor: ${old_value:.4f} → ${new_value:.4f} (Δ: ${new_value - old_value:+.4f})")
+        print(f"💰 Value: ${old_value:.4f} → ${new_value:.4f} (Δ: ${new_value - old_value:+.4f})")
         print(f"📊 Size: {old_size} → {new_size} (Δ: {new_size - old_size:+.2f})")
-        print(f"💵 Preço: Avg ${avg_price:.4f} | Atual ${cur_price:.4f}")
+        print(f"💵 Price: Avg ${avg_price:.4f} | Current ${cur_price:.4f}")
         print(f"📈 PnL: ${cash_pnl:+.4f} ({percent_pnl:+.1f}%)")
         print("=" * 100)
         
 
         sized_value = sizing_constraints(new_value - old_value)
         if sized_value > 1:
-            print(f"✅ Sized value ({sized_value}) > 1, fazendo ordem de compra...")
+            print(f"✅ Sized value ({sized_value}) > 1, placing buy order...")
             response = make_order(price=avg_price, size=sized_value, side=BUY, token_id=asset)
             print(f"📤 Response: {response}")
             return response
         elif sized_value <= -1:
-            print(f"⏭️  Sized value ({sized_value}) <= -1, fazendo ordem de venda...")
+            print(f"⏭️  Sized value ({sized_value}) <= -1, placing sell order...")
             response = make_order(price=avg_price, size=sized_value, side=SELL, token_id=asset)
             print(f"📤 Response: {response}")
             return response
@@ -196,17 +196,17 @@ def handle_update_position(payload):
         
         # return None
     except Exception as e:
-        print(f"❌ Erro ao processar atualização de posição: {e}")
+        print(f"❌ Error processing position update: {e}")
         import traceback
         traceback.print_exc()
         return None
 
 async def listen_to_positions():
     """
-    Inicia o listener para novas posições (INSERTs)
+    Starts listener for new positions (INSERTs)
     """
-    print("🔍 Iniciando listener de posições...")
-    print(f"📊 Monitorando tabela: {TABLE_NAME_POSITIONS} (INSERT)")
+    print("🔍 Starting positions listener...")
+    print(f"📊 Monitoring table: {TABLE_NAME_POSITIONS} (INSERT)")
     
     try:
         # Usar cliente compartilhado
@@ -218,27 +218,27 @@ async def listen_to_positions():
             .subscribe()
         )
         
-        print("✅ Listener de posições conectado!\n")
+        print("✅ Positions listener connected!\n")
         
-        # Manter rodando até ser interrompido
+        # Keep running until interrupted
         while True:
             await asyncio.sleep(1)
             
     except asyncio.CancelledError:
-        print("🛑 Listener de posições cancelado")
+        print("🛑 Positions listener cancelled")
         if 'response' in locals():
             await response.unsubscribe()
         raise
     except Exception as e:
-        print(f"❌ Erro no listener de posições: {e}")
+        print(f"❌ Error in positions listener: {e}")
         raise
 
 async def listen_to_updates():
     """
-    Inicia o listener para atualizações de posições (UPDATEs)
+    Starts listener for position updates (UPDATEs)
     """
-    print("🔍 Iniciando listener de atualizações...")
-    print(f"📊 Monitorando tabela: {TABLE_NAME_POSITIONS} (UPDATE)")
+    print("🔍 Starting updates listener...")
+    print(f"📊 Monitoring table: {TABLE_NAME_POSITIONS} (UPDATE)")
     
     try:
         # Usar cliente compartilhado
@@ -250,27 +250,27 @@ async def listen_to_updates():
             .subscribe()
         )
 
-        print("✅ Listener de atualizações conectado!\n")
+        print("✅ Updates listener connected!\n")
         
-        # Manter rodando até ser interrompido
+        # Keep running until interrupted
         while True:
             await asyncio.sleep(1)
             
     except asyncio.CancelledError:
-        print("🛑 Listener de atualizações cancelado")
+        print("🛑 Updates listener cancelled")
         if 'response' in locals():
             await response.unsubscribe()
         raise
     except Exception as e:
-        print(f"❌ Erro no listener de atualizações: {e}")
+        print(f"❌ Error in updates listener: {e}")
         raise
 
 async def listen_to_trades():
     """
-    Inicia o listener para novas trades (INSERTs)
+    Starts listener for new trades (INSERTs)
     """
-    print("🔍 Iniciando listener de trades...")
-    print(f"📊 Monitorando tabela: {TABLE_NAME_TRADES} (INSERT)")
+    print("🔍 Starting trades listener...")
+    print(f"📊 Monitoring table: {TABLE_NAME_TRADES} (INSERT)")
     
     try:
         # Usar cliente compartilhado
@@ -282,34 +282,34 @@ async def listen_to_trades():
             .subscribe()
         )
         
-        print("✅ Listener de trades conectado!\n")
+        print("✅ Trades listener connected!\n")
         
-        # Manter rodando até ser interrompido
+        # Keep running until interrupted
         while True:
             await asyncio.sleep(1)
             
     except asyncio.CancelledError:
-        print("🛑 Listener de trades cancelado")
+        print("🛑 Trades listener cancelled")
         if 'response' in locals():
             await response.unsubscribe()
         raise
     except Exception as e:
-        print(f"❌ Erro no listener de trades: {e}")
+        print(f"❌ Error in trades listener: {e}")
         raise
 
 
 async def run_all_listeners():
     """
-    Executa todos os listeners em paralelo
+    Runs all listeners in parallel
     """
     print("=" * 100)
-    print("🚀 INICIANDO SISTEMA DE MONITORAMENTO POLYMARKET")
+    print("🚀 STARTING POLYMARKET MONITORING SYSTEM")
     print("=" * 100)
-    print(f"⏰ Hora de início: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+    print(f"⏰ Start time: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
     print()
     
     try:
-        # Executar todos os listeners simultaneamente
+        # Run all listeners simultaneously
         await asyncio.gather(
             listen_to_trades(),
             listen_to_positions(),
@@ -317,22 +317,22 @@ async def run_all_listeners():
         )
     except KeyboardInterrupt:
         print("\n" + "=" * 100)
-        print("🛑 Interrompido pelo usuário (Ctrl+C)")
+        print("🛑 Interrupted by user (Ctrl+C)")
         print("=" * 100)
     except Exception as e:
         print("\n" + "=" * 100)
-        print(f"❌ Erro fatal: {e}")
+        print(f"❌ Fatal error: {e}")
         print("=" * 100)
         raise
     finally:
-        print(f"⏰ Hora de término: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
-        print("👋 Sistema encerrado!")
+        print(f"⏰ End time: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
+        print("👋 System shutdown!")
 
 
 def _start_polling_threads():
     """Start 5s polling threads for history and positions."""
-    user_addr = config.PROXY_WALLET_SELF
-    print("iniciando polling threads")
+    user_addr = config.TRADER_WALLET
+    print("starting polling threads")
     if not user_addr:
         print("No user address configured for polling; skipping background polling.")
         return
@@ -370,10 +370,10 @@ if __name__ == "__main__":
     except Exception:
         traceback.print_exc()
 
-    # Executar todos os listeners
+    # Run all listeners
     asyncio.run(run_all_listeners())
     
-    # Para rodar apenas um listener específico, comente a linha acima e descomente uma das linhas abaixo:
+    # To run only a specific listener, comment the line above and uncomment one of the lines below:
     # asyncio.run(listen_to_trades())
     # asyncio.run(listen_to_positions())
     # asyncio.run(listen_to_updates())

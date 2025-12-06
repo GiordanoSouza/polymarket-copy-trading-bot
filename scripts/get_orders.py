@@ -17,58 +17,58 @@ activity = resp.json()
 print(activity)
 
 print("\n" + "="*80)
-print(f"TOTAL DE ATIVIDADES: {len(activity)}")
+print(f"TOTAL ACTIVITIES: {len(activity)}")
 print("="*80 + "\n")
 
 for i, act in enumerate(activity, 1):
-    # Converter timestamp para data/hora legível
+    # Convert timestamp to readable date/time
     act_time = datetime.fromtimestamp(act['timestamp']).strftime('%d/%m/%Y %H:%M:%S')
     
-    # Determinar tipo de atividade e emoji
+    # Determine activity type and emoji
     if act['type'] == 'TRADE':
-        type_emoji = "🟢 COMPRA" if act['side'] == 'BUY' else "🔴 VENDA"
+        type_emoji = "🟢 BUY" if act['side'] == 'BUY' else "🔴 SELL"
         type_label = f"TRADE - {type_emoji}"
     elif act['type'] == 'YIELD':
-        type_label = "💰 RENDIMENTO (YIELD)"
+        type_label = "💰 YIELD"
     else:
         type_label = f"📋 {act['type']}"
     
     print(f"\n{'─'*80}")
-    print(f"ATIVIDADE #{i} - {type_label}")
+    print(f"ACTIVITY #{i} - {type_label}")
     print(f"{'─'*80}")
-    print(f"📅 Data/Hora: {act_time}")
+    print(f"📅 Date/Time: {act_time}")
     
-    # Exibir informações específicas do tipo TRADE
+    # Display specific information for TRADE type
     if act['type'] == 'TRADE' and act.get('title'):
-        print(f"📊 Mercado: {act['title']}")
-        print(f"🎯 Resultado: {act['outcome']} (Index: {act['outcomeIndex']})")
-        print(f"\n💰 DETALHES DA OPERAÇÃO:")
-        print(f"   • Quantidade: {act['size']:,.2f} tokens")
-        print(f"   • Preço Unitário: ${act['price']:.6f}")
-        print(f"   • Valor em USDC: ${act['usdcSize']:,.2f}")
-        print(f"   • Valor Total: ${act['size'] * act['price']:,.2f}")
+        print(f"📊 Market: {act['title']}")
+        print(f"🎯 Outcome: {act['outcome']} (Index: {act['outcomeIndex']})")
+        print(f"\n💰 OPERATION DETAILS:")
+        print(f"   • Quantity: {act['size']:,.2f} tokens")
+        print(f"   • Unit Price: ${act['price']:.6f}")
+        print(f"   • USDC Value: ${act['usdcSize']:,.2f}")
+        print(f"   • Total Value: ${act['size'] * act['price']:,.2f}")
     
-    # Exibir informações específicas do tipo YIELD
+    # Display specific information for YIELD type
     elif act['type'] == 'YIELD':
-        print(f"\n💵 DETALHES DO RENDIMENTO:")
-        print(f"   • Quantidade: {act['size']:.6f} tokens")
-        print(f"   • Valor em USDC: ${act['usdcSize']:.6f}")
+        print(f"\n💵 YIELD DETAILS:")
+        print(f"   • Quantity: {act['size']:.6f} tokens")
+        print(f"   • USDC Value: ${act['usdcSize']:.6f}")
     
-    # Informações do trader (se disponível)
+    # Trader information (if available)
     if act.get('name'):
         print(f"\n👤 TRADER:")
-        print(f"   • Nome: {act['name']}")
-        print(f"   • Pseudônimo: {act['pseudonym']}")
+        print(f"   • Name: {act['name']}")
+        print(f"   • Pseudonym: {act['pseudonym']}")
         if act.get('bio'):
             print(f"   • Bio: {act['bio']}")
     
-    # Informações técnicas
-    print(f"\n🔗 INFORMAÇÕES TÉCNICAS:")
+    # Technical information
+    print(f"\n🔗 TECHNICAL INFORMATION:")
     print(f"   • Proxy Wallet: {act['proxyWallet']}")
     print(f"   • TX Hash: {act['transactionHash']}")
     if act.get('eventSlug') and act['eventSlug']:
         print(f"   • Market: https://polymarket.com/event/{act['eventSlug']}")
 
 print(f"\n{'='*80}")
-print("FIM DAS ATIVIDADES")
+print("END OF ACTIVITIES")
 print("="*80 + "\n")

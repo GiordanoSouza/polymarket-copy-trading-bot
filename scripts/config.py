@@ -40,8 +40,7 @@ class Config:
         self.CLOB_API_URL = os.getenv("CLOB_API_URL", "https://clob.polymarket.com")
         self.POLY_CHAIN_ID = int(os.getenv("POLY_CHAIN_ID", "137"))
         
-        # Wallet Configuration
-        self.PROXY_WALLET_SELF = os.getenv("PROXY_WALLET_SELF")
+        # Trader Wallet Configuration
         self.TRADER_WALLET = os.getenv("TRADER_WALLET")
         
         # Database Table Names
@@ -71,9 +70,9 @@ class Config:
         if not self.POLY_FUNDER:
             errors.append("POLY_FUNDER is not set in .env file")
         
-        # Check wallet configuration
-        if not self.PROXY_WALLET_SELF:
-            errors.append("PROXY_WALLET_SELF is not set in .env file")
+        # Check trader wallet configuration
+        if not self.TRADER_WALLET:
+            errors.append("TRADER_WALLET is not set in .env file")
         
         if errors:
             error_message = "\n❌ Configuration Errors:\n" + "\n".join(f"  - {error}" for error in errors)
@@ -90,7 +89,7 @@ class Config:
         return {
             'stake_min': self.STAKE_MIN,
             'stake_max': self.STAKE_MAX,
-            'stake_whale_pct': self.STAKE_WHALE_PCT
+            'sizing_whale_pct': self.STAKE_WHALE_PCT
         }
     
     def print_config_summary(self):
@@ -101,9 +100,7 @@ class Config:
         print(f"📊 Supabase URL: {self.SUPABASE_URL}")
         print(f"🔗 CLOB API: {self.CLOB_API_URL}")
         print(f"⛓️  Chain ID: {self.POLY_CHAIN_ID}")
-        print(f"👛 Your Wallet: {self.PROXY_WALLET_SELF[:10] if self.PROXY_WALLET_SELF else 'Not set'}...")
-        if self.TRADER_WALLET:
-            print(f"📈 Copying Trader: {self.TRADER_WALLET[:10]}...")
+        print(f"📈 Trader Wallet (to copy): {self.TRADER_WALLET[:10] if self.TRADER_WALLET else 'Not set'}...")
         print(f"💰 Bankroll: ${self.get_bankroll()}")
         print(f"📊 Min Stake: ${self.STAKE_MIN}")
         print(f"📊 Max Stake: ${self.STAKE_MAX}")
