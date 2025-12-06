@@ -117,8 +117,21 @@ Create your Supabase project and run the setup:
 
 - Go to [supabase.com](https://supabase.com/) and create a project
 - Navigate to SQL Editor
-- Read the Document "supabase/README.md"
+- Read the Document "supabase/README.md" and execute the SQL script
 - Get your project URL and anon key from Settings → API and Data API
+
+**⚠️ IMPORTANT: Enable Realtime on Tables**
+
+The bot needs Realtime enabled to detect trades instantly. After creating the tables:
+
+1. Go to your Supabase Dashboard
+2. Click on **Database** → **Database tables** -> **edit table** -> **enable real time** 
+3. Find the following tables and enable Realtime for each:
+   - `historic_trades`
+   - `polymarket_positions`
+4. Click the toggle switch to **enable** Realtime for both tables
+
+Without Realtime enabled, the bot won't detect new trades or position changes!
 
 4. **Configure your copytrading bot**
 
