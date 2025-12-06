@@ -100,8 +100,8 @@ Get your **polymarket-copy-trading-bot** running in 5 minutes:
 
 1. **Clone the polymarket bot repository**
 ```bash
-git clone https://github.com/yourusername/cute_poly.git
-cd cute_poly
+git clone https://github.com/yourusername/polymarket-copy-trading-bot.git
+cd polymarket-copy-trading-bot
 ```
 
 2. **Set up Python environment**
@@ -117,7 +117,7 @@ Create your Supabase project and run the setup:
 
 - Go to [supabase.com](https://supabase.com/) and create a project
 - Navigate to SQL Editor
-- Copy and execute the SQL from `supabase/create_table.sql`
+- Read the Document "supabase/README.md"
 - Get your project URL and anon key from Settings → API
 
 4. **Configure your copytrading bot**
@@ -143,7 +143,6 @@ PROXY_WALLET_SELF=your-wallet-address
 TRADER_WALLET=trader-wallet-address-to-copy
 
 # Optional: Sizing Configuration
-BANKROLL=500
 STAKE_WHALE_PCT=0.001
 ```
 
@@ -254,20 +253,12 @@ cute_poly/                          # Polymarket copy trading bot
 
 ## 🛡️ Risk Management
 
-### Important Notes for Polymarket Trading
-
-- ⚠️ **Start Small**: Test with minimal capital ($50-100) first
-- ⚠️ **Monitor Daily**: Check your bot's performance regularly
-- ⚠️ **Understand Risks**: Prediction market trading involves capital risk
-- ⚠️ **Secure Keys**: Never share your private keys
-- ⚠️ **Use Test Wallet**: Consider using a separate wallet for the bot
 
 ### Position Sizing Tips
 
 1. Set `STAKE_WHALE_PCT` conservatively (0.001 = 0.1%)
-2. Adjust `BANKROLL` to your actual available capital
-3. Monitor the trader's performance before increasing position sizes
-4. Keep some capital in reserve for market opportunities
+2. Monitor the trader's performance before increasing position sizes
+3. Keep some capital in reserve for market opportunities
 
 ## 🤝 Contributing
 
