@@ -13,9 +13,6 @@ py-clob-client>=0.20.0
 # HTTP requests
 requests>=2.31.0
 
-# YAML configuration parsing
-pyyaml>=6.0.1
-
 # WebSocket support (used by Supabase realtime)
 websockets>=12.0
 

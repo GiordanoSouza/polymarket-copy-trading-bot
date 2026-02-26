@@ -245,7 +245,7 @@ The bot provides real-time console output showing:
 ## 📁 Project Structure
 
 ```
-cute_poly/                          # Polymarket copy trading bot
+polymarket-copy-trading-bot/         # Polymarket copy trading bot
 ├── scripts/
 │   ├── main.py                    # Main bot application
 │   ├── config.py                  # Configuration management

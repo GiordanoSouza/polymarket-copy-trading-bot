@@ -59,10 +59,12 @@ CREATE TABLE polymarket_positions (
     PRIMARY KEY (proxy_wallet, asset)
 );
 
-ALTER TABLE historic_trades 
-ADD COLUMN unique_key VARCHAR(500) 
+ALTER TABLE historic_trades
+ADD COLUMN unique_activity_key VARCHAR(500)
 GENERATED ALWAYS AS (
-    transaction_hash || '_' || 
-    COALESCE(condition_id, 'null') || '_' || 
+    transaction_hash || '_' ||
+    COALESCE(condition_id, 'null') || '_' ||
     COALESCE(price::text, 'null')
 ) STORED;
+
+CREATE UNIQUE INDEX idx_unique_activity_key ON historic_trades (unique_activity_key);
