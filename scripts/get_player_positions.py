@@ -1,22 +1,17 @@
 # Code to get player positions and detect if any position exceeds the defined limit
 import requests
-import os
-from pprint import pprint
-from dotenv import load_dotenv
 from supabase import create_client, Client
-from datetime import datetime
+from config import get_config
 
-load_dotenv()
+# Load configuration
+config = get_config()
 
 # config supabase
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
-trader_wallet = os.environ.get("TRADER_WALLET")
+supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_KEY)
 
 API_URL = 'https://data-api.polymarket.com/positions'
 MAX_LIMIT = 500  # Limite máximo da API
-TABLE_NAME = "polymarket_positions"
+TABLE_NAME = config.TABLE_NAME_POSITIONS
 
 def fetch_player_positions(user_address: str, limit: int = 500, offset: int = 0, condition_id: str = None):
     try:
@@ -213,7 +208,7 @@ def detect_big_positions(positions: list, size_limit: float = 1000.0):
 
 if __name__ == '__main__':
     # Example usage - replace with actual wallet address
-    user = input("Enter user address to fetch positions: ") or trader_wallet
+    user = input("Enter user address to fetch positions: ") or config.TRADER_WALLET
     positions = fetch_player_positions(user_address=user)
     if positions:
         print("positions", positions[0])

@@ -1,4 +1,3 @@
-import os
 import asyncio
 from datetime import datetime
 import threading
@@ -11,9 +10,7 @@ from get_player_history_new import (
     fetch_activities as fetch_history_activities,
     insert_activities_batch as insert_history_batch,
 )
-import get_ok
 from constraints.sizing import sizing_constraints
-from constraints.validators import has_already_an_open_position
 from py_clob_client.order_builder.constants import BUY, SELL
 from config import get_config
 
@@ -79,14 +76,15 @@ def handle_new_trade(payload):
             return response 
         else:
             print(f"⏭️  Side is BUY, checking if size is greater than 1")
-            sized_price = sizing_constraints(usdc_size)
-            if sized_price >= 1:
-                print(f"✅ Sized price ({sized_price}) >= 1, placing order...")
-                response = make_order(price=price, size=sizing_constraints(size), side=side, token_id=token_id)
+            sized_usdc = sizing_constraints(usdc_size)
+            sized_size = sizing_constraints(size)
+            if sized_usdc >= 1:
+                print(f"✅ Sized USDC ({sized_usdc}) >= 1, placing order with size {sized_size}...")
+                response = make_order(price=price, size=sized_size, side=side, token_id=token_id)
                 print(f"📤 Response: {response}")
-                return response 
+                return response
             else:
-                print(f"⏭️  Sized price ({sized_price}) < 1, skipping order")
+                print(f"⏭️  Sized USDC ({sized_usdc}) < 1, skipping order")
                 return None
     except Exception as e:
         print(f"❌ Error processing new trade: {e}")
@@ -132,7 +130,6 @@ def handle_new_position(payload):
             return None
     except Exception as e:
         print(f"❌ Error processing new position: {e}")
-        import traceback
         traceback.print_exc()
         return None
 
@@ -187,17 +184,8 @@ def handle_update_position(payload):
         else:
             print(f"⏭️  Sized value ({sized_value}) did not meet the criteria")
             return None
-        # Aqui você pode adicionar lógica específica para atualizações
-        # Exemplo: Take profit se PnL% > 50%, Stop loss se < -20%, etc.
-        # if percent_pnl >= 50:
-        #     print(f"🎉 PnL positivo de {percent_pnl}%! Considere realizar lucros.")
-        # elif percent_pnl <= -20:
-        #     print(f"⚠️  PnL negativo de {percent_pnl}%! Considere stop loss.")
-        
-        # return None
     except Exception as e:
         print(f"❌ Error processing position update: {e}")
-        import traceback
         traceback.print_exc()
         return None
 

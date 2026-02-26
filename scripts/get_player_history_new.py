@@ -1,8 +1,6 @@
 import requests
-import os
-import datetime
 from supabase import create_client, Client
-from datetime import datetime, timedelta
+from datetime import datetime
 from config import get_config
 
 # Load configuration
@@ -81,19 +79,29 @@ def fetch_activities(user_address: str, limit: int = 500, offset: int = 0):
 
 def insert_activities_batch(activities: list):
     """
-    Insert activities into the database
+    Insert activities into the database, skipping duplicates.
+    Uses upsert with unique_activity_key to avoid errors on re-polls.
     """
-    success_count = 0
     if not activities:
         print("No activities to insert")
-        return
+        return 0
+
+    success_count = 0
+    skip_count = 0
     for activity in activities:
         try:
-            supabase.table(TABLE_NAME).insert(activity).execute()
+            supabase.table(TABLE_NAME).upsert(
+                activity, on_conflict="unique_activity_key"
+            ).execute()
             success_count += 1
         except Exception as e:
-            print(f"Error inserting activities: {e}")
-            return success_count
+            error_msg = str(e).lower()
+            if 'duplicate' in error_msg or 'unique' in error_msg or 'conflict' in error_msg:
+                skip_count += 1
+            else:
+                print(f"Error inserting activity: {e}")
+    if skip_count:
+        print(f"Skipped {skip_count} duplicate activities")
     return success_count
 
 if __name__ == "__main__":
